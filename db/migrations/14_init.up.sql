@@ -1,0 +1,1 @@
+ALTER TABLE users ADD COLUMN hasBroadcast boolean not null default false;

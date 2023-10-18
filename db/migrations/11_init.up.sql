@@ -1,0 +1,1 @@
+ALTER TABLE users ADD COLUMN reset_token varchar(280);

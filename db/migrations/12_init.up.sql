@@ -1,0 +1,1 @@
+ALTER TABLE follower ADD CONSTRAINT uk_follower_follower_following UNIQUE (follower, following);

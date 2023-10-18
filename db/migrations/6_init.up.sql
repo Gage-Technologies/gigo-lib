@@ -1,0 +1,1 @@
+ALTER TABLE users ADD COLUMN stripe_account varchar(280);

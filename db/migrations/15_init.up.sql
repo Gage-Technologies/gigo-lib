@@ -1,0 +1,2 @@
+ALTER TABLE users DROP COLUMN hasBroadcast;
+ALTER TABLE users ADD COLUMN has_broadcast BOOLEAN NOT NULL DEFAULT false;

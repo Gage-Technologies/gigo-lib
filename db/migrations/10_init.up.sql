@@ -1,0 +1,1 @@
+ALTER TABLE users ADD COLUMN exclusive_agreement boolean not null default false;
