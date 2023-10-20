@@ -23,8 +23,9 @@ import (
 )
 
 // InitializeWorkspaceAgent fetches metadata for the currently authenticated workspace agent.
-func (c *AgentClient) InitializeWorkspaceAgent(ctx context.Context) (WorkspaceAgentMetadata, error) {
-	res, err := c.Request(ctx, http.MethodGet, "/internal/v1/ws/initialize", nil)
+func (c *AgentClient) InitializeWorkspaceAgent(ctx context.Context, isVnc bool) (WorkspaceAgentMetadata, error) {
+	isVNCReq := InitializeWorkspaceAgentRequest{IsVNC: isVnc}
+	res, err := c.Request(ctx, http.MethodPost, "/internal/v1/ws/initialize", isVNCReq)
 	if err != nil {
 		return WorkspaceAgentMetadata{}, err
 	}

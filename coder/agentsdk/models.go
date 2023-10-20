@@ -18,6 +18,10 @@ type PostWorkspaceAgentState struct {
 	State models.WorkspaceAgentState `json:"state"`
 }
 
+type InitializeWorkspaceAgentRequest struct {
+	IsVNC bool `json:"is_vnc"`
+}
+
 // WorkspaceAgentConnectionInfo returns required information for establishing
 // a connection with a workspace.
 type WorkspaceAgentConnectionInfo struct {
