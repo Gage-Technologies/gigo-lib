@@ -162,6 +162,7 @@ type Workspace struct {
 	OverAllocated     *OverAllocated        `json:"over_allocated" sql:"over_allocated"`
 	Ports             []WorkspacePort       `json:"ports" sql:"ports"`
 	IsEphemeral       bool                  `json:"is_ephemeral" sql:"is_ephemeral"`
+	IsVNC             bool                  `json:"is_vnc" sql:"is_vnc"`
 }
 
 type WorkspaceSQL struct {
@@ -182,6 +183,7 @@ type WorkspaceSQL struct {
 	OverAllocated     []byte             `json:"over_allocated" sql:"over_allocated"`
 	Ports             []byte             `json:"ports" sql:"ports"`
 	IsEphemeral       bool               `json:"is_ephemeral" sql:"is_ephemeral"`
+	IsVNC             bool               `json:"is_vnc" sql:"is_vnc"`
 }
 
 type WorkspaceFrontend struct {
@@ -203,6 +205,7 @@ type WorkspaceFrontend struct {
 	OverAllocated        *OverAllocated          `json:"over_allocated" sql:"over_allocated"`
 	Ports                []WorkspacePortFrontend `json:"ports"`
 	IsEphemeral          bool                    `json:"is_ephemeral" sql:"is_ephemeral"`
+	IsVNC                bool                    `json:"is_vnc" sql:"is_vnc"`
 }
 
 func CreateWorkspace(id int64, repoId int64, codeSourceId int64, codeSourceType CodeSource, createdAt time.Time,
@@ -303,6 +306,7 @@ func WorkspaceFromSQLNative(rows *sql.Rows) (*Workspace, error) {
 		OverAllocated:     &overAllocated,
 		Ports:             workspacePorts,
 		IsEphemeral:       workspaceSQL.IsEphemeral,
+		IsVNC:             workspaceSQL.IsVNC,
 	}
 
 	return workspace, nil
@@ -335,6 +339,7 @@ func (w *Workspace) ToFrontend(hostname string, https bool) *WorkspaceFrontend {
 		OverAllocated:        w.OverAllocated,
 		Ports:                frontendPorts,
 		IsEphemeral:          w.IsEphemeral,
+		IsVNC:                w.IsVNC,
 	}
 
 	return workspaceFront
@@ -391,9 +396,9 @@ func (w *Workspace) ToSQLNative() ([]*SQLInsertStatement, error) {
 
 	return []*SQLInsertStatement{
 		{
-			Statement: "insert ignore into workspaces(_id, code_source_id, code_source_type, repo_id, created_at, owner_id, template_id, expiration, commit, state, init_state, init_failure, last_state_update, workspace_settings, over_allocated, ports, is_ephemeral) " +
-				"values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
-			Values: []interface{}{w.ID, w.CodeSourceID, w.CodeSourceType, w.RepoID, w.CreatedAt, w.OwnerID, w.TemplateID, w.Expiration, w.Commit, w.State, w.InitState, initFailureBytes, w.LastStateUpdate, wsSettingsBytes, wsOverAllocatedBytes, wsPorts, w.IsEphemeral},
+			Statement: "insert ignore into workspaces(_id, code_source_id, code_source_type, repo_id, created_at, owner_id, template_id, expiration, commit, state, init_state, init_failure, last_state_update, workspace_settings, over_allocated, ports, is_ephemeral, is_vnc) " +
+				"values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+			Values: []interface{}{w.ID, w.CodeSourceID, w.CodeSourceType, w.RepoID, w.CreatedAt, w.OwnerID, w.TemplateID, w.Expiration, w.Commit, w.State, w.InitState, initFailureBytes, w.LastStateUpdate, wsSettingsBytes, wsOverAllocatedBytes, wsPorts, w.IsEphemeral, w.IsVNC},
 		},
 	}, nil
 }
