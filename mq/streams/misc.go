@@ -12,6 +12,7 @@ const (
 
 	SubjectMiscSessionCleanKeys = "MISC.SessionCleanKeys"
 	SubjectMiscUserFreePremium  = "MISC.UserFreePremium"
+	SubjectMiscSitemapGenerate  = "MISC.SiteMapGenerate"
 
 	RetentionPolicyMisc = nats.WorkQueuePolicy
 
@@ -21,4 +22,5 @@ const (
 var StreamSubjectsMisc = []string{
 	SubjectMiscSessionCleanKeys,
 	SubjectMiscUserFreePremium,
+	SubjectMiscSitemapGenerate,
 }
