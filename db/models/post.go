@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gage-technologies/gigo-lib/db"
+	ti "github.com/gage-technologies/gigo-lib/db"
 	"github.com/google/uuid"
 	"github.com/kisielk/sqlstruct"
 	"go.opentelemetry.io/otel"
@@ -43,7 +43,8 @@ type Post struct {
 	Embedded                bool                  `json:"embedded" sql:"embedded"`
 	Deleted                 bool                  `json:"deleted" sql:"deleted"`
 	ExclusiveDescription    *string               `json:"exclusive_description,omitempty" sql:"exclusive_description"`
-	ShareHash              *uuid.UUID               `json:"share_hash" sql:"share_hash"`
+	ShareHash               *uuid.UUID            `json:"share_hash" sql:"share_hash"`
+	EstimatedTutorialTime   *time.Duration        `json:"estimated_tutorial_time,omitempty" sql:"estimated_tutorial_time"`
 }
 
 type PostSQL struct {
@@ -73,41 +74,43 @@ type PostSQL struct {
 	Embedded                bool           `json:"embedded" sql:"embedded"`
 	Deleted                 bool           `json:"deleted" sql:"deleted"`
 	ExclusiveDescription    *string        `json:"exclusive_description" sql:"exclusive_description"`
-	ShareHash              *uuid.UUID      `json:"share_hash" sql:"share_hash"`
+	ShareHash               *uuid.UUID     `json:"share_hash" sql:"share_hash"`
+	EstimatedTutorialTime   *time.Duration `json:"estimated_tutorial_time" sql:"estimated_tutorial_time"`
 }
 
 type PostFrontend struct {
-	ID                      string                `json:"_id"`
-	Title                   string                `json:"title"`
-	Description             string                `json:"description"`
-	Author                  string                `json:"author"`
-	AuthorID                string                `json:"author_id"`
-	CreatedAt               time.Time             `json:"created_at"`
-	UpdatedAt               time.Time             `json:"updated_at"`
-	RepoID                  string                `json:"repo_id"`
-	Tier                    TierType              `json:"tier"`
-	TierString              string                `json:"tier_string"`
-	Awards                  []string              `json:"awards"`
-	TopReply                *string               `json:"top_reply"`
-	Coffee                  uint64                `json:"coffee"`
-	PostType                ChallengeType         `json:"post_type"`
-	PostTypeString          string                `json:"post_type_string"`
-	Views                   int64                 `json:"views"`
-	Completions             int64                 `json:"completions"`
-	Attempts                int64                 `json:"attempts"`
-	Languages               []ProgrammingLanguage `json:"languages"`
-	LanguageStrings         []string              `json:"languages_strings"`
-	Published               bool                  `json:"published"`
-	Visibility              PostVisibility        `json:"visibility"`
-	VisibilityString        string                `json:"visibility_string"`
-	Tags                    []string              `json:"tags"`
-	Thumbnail               string                `json:"thumbnail"`
-	ChallengeCost           *string               `json:"challenge_cost"`
-	WorkspaceConfig         string                `json:"workspace_config"`
-	WorkspaceConfigRevision int                   `json:"workspace_config_revision"`
-	Leads                   bool                  `json:"leads" sql:"leads"`
-	Deleted                 bool                  `json:"deleted" sql:"deleted"`
-	ExclusiveDescription    *string               `json:"exclusive_description"`
+	ID                          string                `json:"_id"`
+	Title                       string                `json:"title"`
+	Description                 string                `json:"description"`
+	Author                      string                `json:"author"`
+	AuthorID                    string                `json:"author_id"`
+	CreatedAt                   time.Time             `json:"created_at"`
+	UpdatedAt                   time.Time             `json:"updated_at"`
+	RepoID                      string                `json:"repo_id"`
+	Tier                        TierType              `json:"tier"`
+	TierString                  string                `json:"tier_string"`
+	Awards                      []string              `json:"awards"`
+	TopReply                    *string               `json:"top_reply"`
+	Coffee                      uint64                `json:"coffee"`
+	PostType                    ChallengeType         `json:"post_type"`
+	PostTypeString              string                `json:"post_type_string"`
+	Views                       int64                 `json:"views"`
+	Completions                 int64                 `json:"completions"`
+	Attempts                    int64                 `json:"attempts"`
+	Languages                   []ProgrammingLanguage `json:"languages"`
+	LanguageStrings             []string              `json:"languages_strings"`
+	Published                   bool                  `json:"published"`
+	Visibility                  PostVisibility        `json:"visibility"`
+	VisibilityString            string                `json:"visibility_string"`
+	Tags                        []string              `json:"tags"`
+	Thumbnail                   string                `json:"thumbnail"`
+	ChallengeCost               *string               `json:"challenge_cost"`
+	WorkspaceConfig             string                `json:"workspace_config"`
+	WorkspaceConfigRevision     int                   `json:"workspace_config_revision"`
+	Leads                       bool                  `json:"leads" sql:"leads"`
+	Deleted                     bool                  `json:"deleted" sql:"deleted"`
+	ExclusiveDescription        *string               `json:"exclusive_description"`
+	EstimatedTutorialTimeMillis *int64                `json:"estimated_tutorial_time_millis"`
 }
 
 func CreatePost(id int64, title string, description string, author string, authorID int64, createdAt time.Time,
@@ -270,7 +273,8 @@ func PostFromSQLNative(db *ti.Database, rows *sql.Rows) (*Post, error) {
 		Embedded:                postSQL.Embedded,
 		Deleted:                 postSQL.Deleted,
 		ExclusiveDescription:    postSQL.ExclusiveDescription,
-		ShareHash: postSQL.ShareHash,
+		ShareHash:               postSQL.ShareHash,
+		EstimatedTutorialTime:   postSQL.EstimatedTutorialTime,
 	}
 
 	return post, nil
@@ -350,38 +354,46 @@ func (i *Post) ToFrontend() (*PostFrontend, error) {
 	//	return nil, fmt.Errorf("failed to hash post id: %v", err)
 	// }
 
+	// conditionally load the estimated time
+	var estimatedTime *int64
+	if i.EstimatedTutorialTime != nil {
+		millis := i.EstimatedTutorialTime.Milliseconds()
+		estimatedTime = &millis
+	}
+
 	// create new post frontend
 	mf := &PostFrontend{
-		ID:                      fmt.Sprintf("%d", i.ID),
-		Title:                   i.Title,
-		Description:             i.Description,
-		Author:                  i.Author,
-		AuthorID:                fmt.Sprintf("%d", i.AuthorID),
-		CreatedAt:               i.CreatedAt,
-		UpdatedAt:               i.UpdatedAt,
-		RepoID:                  fmt.Sprintf("%d", i.RepoID),
-		Tier:                    i.Tier,
-		TierString:              i.Tier.String(),
-		Awards:                  awards,
-		TopReply:                &topReply,
-		Coffee:                  i.Coffee,
-		PostType:                i.PostType,
-		PostTypeString:          i.PostType.String(),
-		Views:                   i.Views,
-		Attempts:                i.Attempts,
-		Completions:             i.Completions,
-		Languages:               i.Languages,
-		LanguageStrings:         langStrings,
-		Published:               i.Published,
-		Visibility:              i.Visibility,
-		VisibilityString:        i.Visibility.String(),
-		Tags:                    tags,
-		ChallengeCost:           i.ChallengeCost,
-		WorkspaceConfig:         fmt.Sprintf("%d", i.WorkspaceConfig),
-		WorkspaceConfigRevision: i.WorkspaceConfigRevision,
-		Leads:                   i.Leads,
-		Thumbnail:               fmt.Sprintf("/static/posts/t/%v", i.ID),
-		ExclusiveDescription:    i.ExclusiveDescription,
+		ID:                          fmt.Sprintf("%d", i.ID),
+		Title:                       i.Title,
+		Description:                 i.Description,
+		Author:                      i.Author,
+		AuthorID:                    fmt.Sprintf("%d", i.AuthorID),
+		CreatedAt:                   i.CreatedAt,
+		UpdatedAt:                   i.UpdatedAt,
+		RepoID:                      fmt.Sprintf("%d", i.RepoID),
+		Tier:                        i.Tier,
+		TierString:                  i.Tier.String(),
+		Awards:                      awards,
+		TopReply:                    &topReply,
+		Coffee:                      i.Coffee,
+		PostType:                    i.PostType,
+		PostTypeString:              i.PostType.String(),
+		Views:                       i.Views,
+		Attempts:                    i.Attempts,
+		Completions:                 i.Completions,
+		Languages:                   i.Languages,
+		LanguageStrings:             langStrings,
+		Published:                   i.Published,
+		Visibility:                  i.Visibility,
+		VisibilityString:            i.Visibility.String(),
+		Tags:                        tags,
+		ChallengeCost:               i.ChallengeCost,
+		WorkspaceConfig:             fmt.Sprintf("%d", i.WorkspaceConfig),
+		WorkspaceConfigRevision:     i.WorkspaceConfigRevision,
+		Leads:                       i.Leads,
+		Thumbnail:                   fmt.Sprintf("/static/posts/t/%v", i.ID),
+		ExclusiveDescription:        i.ExclusiveDescription,
+		EstimatedTutorialTimeMillis: estimatedTime,
 	}
 
 	return mf, nil
@@ -401,11 +413,11 @@ func (i *Post) ToSQLNative() ([]*SQLInsertStatement, error) {
 	// create slice to hold insertion statements for this post and initialize the slice with the main post insertion statement
 	sqlStatements := []*SQLInsertStatement{
 		{
-			Statement: "insert ignore into post(_id, title, description, author, author_id, created_at, updated_at, repo_id, top_reply, tier, coffee, post_type, views, completions, attempts, published, visibility, stripe_price_id, challenge_cost, workspace_config, workspace_config_revision, workspace_settings, leads, embedded, deleted, exclusive_description, share_hash) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, uuid_to_bin(?));",
+			Statement: "insert ignore into post(_id, title, description, author, author_id, created_at, updated_at, repo_id, top_reply, tier, coffee, post_type, views, completions, attempts, published, visibility, stripe_price_id, challenge_cost, workspace_config, workspace_config_revision, workspace_settings, leads, embedded, deleted, exclusive_description, share_hash, estimated_tutorial_time) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, uuid_to_bin(?), ?);",
 			Values: []interface{}{i.ID, i.Title, i.Description, i.Author, i.AuthorID, i.CreatedAt, i.UpdatedAt, i.RepoID,
 				i.TopReply, i.Tier, i.Coffee, i.PostType, i.Views, i.Completions, i.Attempts, i.Published, i.Visibility,
 				i.StripePriceId, i.ChallengeCost, i.WorkspaceConfig, i.WorkspaceConfigRevision, buf, i.Leads, i.Embedded,
-				i.Deleted, i.ExclusiveDescription, i.ShareHash,
+				i.Deleted, i.ExclusiveDescription, i.ShareHash, i.EstimatedTutorialTime,
 			},
 		},
 	}
