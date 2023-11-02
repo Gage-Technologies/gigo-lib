@@ -61,7 +61,7 @@ func TestExclusiveContentPurchasesFromSQLNative(t *testing.T) {
 		return
 	}
 
-	defer db.DB.Exec("DROP TABLE exclusive_content_purchases")
+	defer db.DB.Exec("delete from exclusive_content_purchases")
 
 	post, err := CreateExclusiveContentPurchases(69420, 6969)
 	if err != nil {

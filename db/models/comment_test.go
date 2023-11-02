@@ -66,8 +66,8 @@ func TestCommentFromSQLNative(t *testing.T) {
 		return
 	}
 
-	defer db.DB.Exec("DROP TABLE comment")
-	defer db.DB.Exec("DROP TABLE comment_awards")
+	defer db.DB.Exec("delete from comment")
+	defer db.DB.Exec("delete from comment_awards")
 
 	comment, err := CreateComment(69420, "test", "author", 42069, time.Now(), TierType(3), []int64{5}, 6969, 20, true, 0, 1)
 	if err != nil {

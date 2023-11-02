@@ -1,3 +1,16 @@
+create table if not exists journey_info(
+    _id bigint not null primary key,
+    user_id bigint not null,
+    learning_goal varchar(280),
+    selected_language varchar(280),
+    end_goal varchar(280),
+    experience_level varchar(280),
+    familiarity_ide varchar(280),
+    familiarity_linux varchar(280),
+    tried varchar(280),
+    tried_online varchar(280),
+    aptitude_level varchar(280)
+);
 -- MySQL 5.7
 
 CREATE TABLE IF NOT EXISTS web_tracking (

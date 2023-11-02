@@ -109,7 +109,7 @@ func TestWorkspace_ToSQLNative(t *testing.T) {
 		return
 	}
 
-	defer db.DB.Exec("DROP TABLE workspaces")
+	defer db.DB.Exec("delete from workspaces")
 
 	id := int64(12345)
 	csId := int64(8685)
@@ -179,7 +179,7 @@ func TestWorkspaceFromSQLNative(t *testing.T) {
 		return
 	}
 
-	defer db.DB.Exec("DROP TABLE workspaces")
+	defer db.DB.Exec("delete from workspaces")
 
 	id := int64(12345)
 	csId := int64(47478568)

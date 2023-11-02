@@ -61,7 +61,7 @@ func TestFollowerFromSQLNative(t *testing.T) {
 		return
 	}
 
-	defer db.DB.Exec("DROP TABLE follower")
+	defer db.DB.Exec("delete from follower")
 
 	post, err := CreateFollower(69420, 6969)
 	if err != nil {

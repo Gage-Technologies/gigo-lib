@@ -89,8 +89,8 @@ func TestUserStatsFromSQLNative(t *testing.T) {
 		return
 	}
 
-	defer db.DB.Exec("DROP TABLE user_stats")
-	defer db.DB.Exec("DROP TABLE user_daily_usage")
+	defer db.DB.Exec("delete from user_stats")
+	defer db.DB.Exec("delete from user_daily_usage")
 
 	post, err := CreateUserStats(69420, 6969420420, 0, false, 0,
 		0, time.Minute, time.Minute, 0, 0, 0, time.Now(),

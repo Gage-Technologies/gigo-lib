@@ -54,7 +54,7 @@ func TestWorkspaceAgentFromSQLNative(t *testing.T) {
 		return
 	}
 
-	defer db.DB.Exec("DROP TABLE workspace_agent")
+	defer db.DB.Exec("delete from workspace_agent")
 
 	id := int64(12345)
 	ownerId := int64(420)

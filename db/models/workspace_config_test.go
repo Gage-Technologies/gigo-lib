@@ -60,9 +60,9 @@ func TestWorkspaceConfigFromSQLNative(t *testing.T) {
 		t.Fatalf("%s failed\n    Error: %v", t.Name(), err)
 	}
 
-	defer db.DB.Exec("DROP TABLE workspace_config")
-	defer db.DB.Exec("DROP TABLE workspace_config_tags")
-	defer db.DB.Exec("DROP TABLE workspace_config_langs")
+	defer db.DB.Exec("delete from workspace_config")
+	defer db.DB.Exec("delete from workspace_config_tags")
+	defer db.DB.Exec("delete from workspace_config_langs")
 
 	wc := CreateWorkspaceConfig(
 		69,

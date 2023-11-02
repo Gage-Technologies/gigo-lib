@@ -61,7 +61,7 @@ func TestReportIssueFromSQLNative(t *testing.T) {
 		return
 	}
 
-	defer db.DB.Exec("DROP TABLE report_issue")
+	defer db.DB.Exec("delete from report_issue")
 
 	post, err := CreateReportIssue(69420, "about", "page doesn't load", 42069)
 	if err != nil {

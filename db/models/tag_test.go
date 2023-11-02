@@ -58,7 +58,7 @@ func TestTagFromSQLNative(t *testing.T) {
 		return
 	}
 
-	defer db.DB.Exec("DROP TABLE post")
+	defer db.DB.Exec("delete from post")
 
 	tag := CreateTag(42069, "test")
 	tag.Official = true

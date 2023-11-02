@@ -72,7 +72,7 @@ func TestWorkspaceAgentStatsFromSQLNative(t *testing.T) {
 		return
 	}
 
-	defer db.DB.Exec("DROP TABLE workspace_agent_stats")
+	defer db.DB.Exec("delete from workspace_agent_stats")
 
 	id := int64(420)
 	agent := int64(69)

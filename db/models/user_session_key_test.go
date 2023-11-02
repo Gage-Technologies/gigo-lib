@@ -34,7 +34,7 @@ func TestUserSessionKeyToFromSQLNative(t *testing.T) {
 		t.Fatalf("\n%v failed\n    Error: %v", t.Name(), err)
 	}
 
-	defer db.DB.Exec("DROP TABLE user_session_key")
+	defer db.DB.Exec("delete from user_session_key")
 
 	pass, err := session.GenerateServicePassword()
 	if err != nil {

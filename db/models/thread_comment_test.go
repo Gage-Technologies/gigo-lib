@@ -66,7 +66,7 @@ func TestThreadCommentFromSQLNative(t *testing.T) {
 		return
 	}
 
-	defer db.DB.Exec("DROP TABLE thread_comment")
+	defer db.DB.Exec("delete from thread_comment")
 
 	comment, err := CreateThreadComment(69420, "test", "author", 42069, time.Now(), TierType(3), 6969, 20, false, 0, 2)
 	if err != nil {

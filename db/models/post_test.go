@@ -140,9 +140,9 @@ func TestPostFromSQLNative(t *testing.T) {
 		return
 	}
 
-	defer db.DB.Exec("DROP TABLE post")
-	defer db.DB.Exec("DROP TABLE post_awards")
-	defer db.DB.Exec("DROP TABLE post_tags")
+	defer db.DB.Exec("delete from post")
+	defer db.DB.Exec("delete from post_awards")
+	defer db.DB.Exec("delete from post_tags")
 
 	id := int64(5)
 	post, err := CreatePost(

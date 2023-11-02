@@ -18,7 +18,7 @@ func TestStoreLoadUserSession(t *testing.T) {
 	rdb := redis.NewClient(&redis.Options{Addr: "gigo-dev-redis:6379", Password: "gigo-dev", DB: 7})
 
 	defer rdb.Del(context.TODO(), "gigo-user-sess-420")
-	defer db.DB.Exec("drop table user_session_key")
+	defer db.DB.Exec("delete from user_session_key")
 
 	serviceKey, err := session3.GenerateServicePassword()
 	if err != nil {

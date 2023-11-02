@@ -110,10 +110,10 @@ func TestInitializeUserTableSQL(t *testing.T) {
 		return
 	}
 
-	defer db.DB.Exec("DROP TABLE users")
-	defer db.DB.Exec("DROP TABLE user_active_times")
-	defer db.DB.Exec("DROP TABLE user_badges")
-	defer db.DB.Exec("DROP TABLE user_saved_posts")
+	defer db.DB.Exec("delete from users")
+	defer db.DB.Exec("delete from user_active_times")
+	defer db.DB.Exec("delete from user_badges")
+	defer db.DB.Exec("delete from user_saved_posts")
 
 	res, err := db.DB.Query("SELECT * FROM information_schema.tables WHERE table_schema = 'gigo_dev_test' AND table_name = 'users' LIMIT 1;")
 	if err != nil {
@@ -170,10 +170,10 @@ func TestUser_ToFromSQLNative(t *testing.T) {
 		return
 	}
 
-	defer db.DB.Exec("DROP TABLE users")
-	defer db.DB.Exec("DROP TABLE user_active_times")
-	defer db.DB.Exec("DROP TABLE user_badges")
-	defer db.DB.Exec("DROP TABLE user_saved_posts")
+	defer db.DB.Exec("delete from users")
+	defer db.DB.Exec("delete from user_active_times")
+	defer db.DB.Exec("delete from user_badges")
+	defer db.DB.Exec("delete from user_saved_posts")
 
 	badges := []int64{1, 2}
 

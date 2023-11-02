@@ -44,7 +44,7 @@ func TestInitializeThreadReplyTableSQL(t *testing.T) {
 		return
 	}
 
-	defer db.DB.Exec("DROP TABLE thread_reply")
+	defer db.DB.Exec("delete from thread_reply")
 
 	res, err := db.DB.Query("SELECT * FROM information_schema.tables WHERE table_schema = 'gigo_dev_test' AND table_name = 'thread_reply' LIMIT 1;")
 	if err != nil {
@@ -89,7 +89,7 @@ func TestThreadReplyFromSQLNative(t *testing.T) {
 		return
 	}
 
-	defer db.DB.Exec("DROP TABLE thread_reply")
+	defer db.DB.Exec("delete from thread_reply")
 
 	comment, err := CreateThreadReply(69420, "test", "author", 42069, time.Now(), TierType(3), 6969, 20, 0, 3)
 	if err != nil {

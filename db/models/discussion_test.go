@@ -66,9 +66,9 @@ func TestDiscussionFromSQLNative(t *testing.T) {
 		return
 	}
 
-	defer db.DB.Exec("DROP TABLE discussion")
-	defer db.DB.Exec("DROP TABLE discussion_awards")
-	defer db.DB.Exec("DROP TABLE discussion_tags")
+	defer db.DB.Exec("delete from discussion")
+	defer db.DB.Exec("delete from discussion_awards")
+	defer db.DB.Exec("delete from discussion_tags")
 
 	d, err := CreateDiscussion(69420, "test", "author", 42069, time.Now(), time.Now(), 5, []int64{69}, 6969, 20, "test", []int64{420}, false, 0, 0)
 	if err != nil {

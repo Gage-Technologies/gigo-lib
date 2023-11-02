@@ -73,7 +73,7 @@ func TestFriendRequestsFromSQLNative(t *testing.T) {
 		return
 	}
 
-	defer db.DB.Exec("DROP TABLE friend_requests")
+	defer db.DB.Exec("delete from friend_requests")
 
 	date := time.Date(1999, 5, 19, 0, 0, 0, 0, time.UTC)
 	friend, err := CreateFriendRequests(1, 69420, "userName", 6969, "name", date, 5)

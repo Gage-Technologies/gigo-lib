@@ -67,7 +67,7 @@ func TestBroadcastEventFromSQLNative(t *testing.T) {
 		return
 	}
 
-	defer db.DB.Exec("DROP TABLE broadcast_event")
+	defer db.DB.Exec("delete from broadcast_event")
 
 	message := "test"
 	ev, err := CreateBroadcastEvent(69420, 6969, "test", "test", 0, time.Now())

@@ -58,7 +58,7 @@ func TestUpVoteFromSQLNative(t *testing.T) {
 		return
 	}
 
-	defer db.DB.Exec("DROP TABLE post")
+	defer db.DB.Exec("delete from post")
 
 	upVote := CreateUpVote(42069, 0, 69, 420)
 

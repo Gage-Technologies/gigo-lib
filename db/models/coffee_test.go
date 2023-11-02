@@ -78,7 +78,7 @@ func TestCoffeeFromSQLNative(t *testing.T) {
 		return
 	}
 
-	defer db.DB.Exec("DROP TABLE coffee")
+	defer db.DB.Exec("delete from coffee")
 
 	attemptId := int64(323)
 	postId := int64(455)

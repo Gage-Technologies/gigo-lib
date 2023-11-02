@@ -96,7 +96,7 @@ func TestRecommendedPostFromSQLNative(t *testing.T) {
 		return
 	}
 
-	defer db.DB.Exec("DROP TABLE recommended_post")
+	defer db.DB.Exec("delete from recommended_post")
 
 	n := time.Now()
 	e := time.Now().Add(time.Minute)
