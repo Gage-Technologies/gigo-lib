@@ -41,6 +41,7 @@ const (
 	PlaygroundChallenge
 	CasualChallenge
 	CompetitiveChallenge
+	DebugChallenge
 )
 
 func (c ChallengeType) String() string {
@@ -53,6 +54,8 @@ func (c ChallengeType) String() string {
 		return "Casual"
 	case CompetitiveChallenge:
 		return "Competitive"
+	case DebugChallenge:
+		return "Debug"
 	}
 	return ""
 }
