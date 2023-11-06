@@ -51,6 +51,12 @@ type WebTracking struct {
 	// Path The path of the page visited
 	Path string `json:"path" sql:"path"`
 
+	// Lattitude The lattitude of the client making the request
+	Lattitude float64 `json:"lattitude" sql:"lattitude"`
+
+	// Longitude The longitude of the client making the request
+	Longitude float64 `json:"longitude" sql:"longitude"`
+
 	// Metadata
 	Metadata map[string]interface{} `json:"metadata" sql:"metadata"`
 }
@@ -64,10 +70,13 @@ type WebTrackingSQL struct {
 	Timestamp time.Time        `json:"timestamp" sql:"timestamp"`
 	TimeSpent *time.Duration   `json:"timespent" sql:"timespent"`
 	Path      string           `json:"path" sql:"path"`
+	Lattitude float64          `json:"lattitude" sql:"lattitude"`
+	Longitude float64          `json:"longitude" sql:"longitude"`
 	Metadata  []byte           `json:"metadata" sql:"metadata"`
 }
 
-func CreateWebTracking(_id int64, userId *int64, ip net.IP, host string, event WebTrackingEvent, timestamp time.Time, timespent *time.Duration, path string, metadata map[string]interface{}) *WebTracking {
+func CreateWebTracking(_id int64, userId *int64, ip net.IP, host string, event WebTrackingEvent,
+	timestamp time.Time, timespent *time.Duration, path string, lattitude float64, longitude float64, metadata map[string]interface{}) *WebTracking {
 	return &WebTracking{
 		ID:        _id,
 		UserID:    userId,
@@ -103,6 +112,8 @@ func WebTrackingFromSqlNative(rows *sql.Rows) (*WebTracking, error) {
 		Timestamp: usage.Timestamp,
 		TimeSpent: usage.TimeSpent,
 		Path:      usage.Path,
+		Lattitude: usage.Lattitude,
+		Longitude: usage.Longitude,
 		Metadata:  metadata,
 	}
 
@@ -124,8 +135,8 @@ func (w *WebTracking) ToSqlNative() ([]SQLInsertStatement, error) {
 
 	return []SQLInsertStatement{
 		{
-			Statement: "insert into web_tracking (_id, user_id, ip, host, event, timestamp, timespent, path, metadata) values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-			Values:    []interface{}{w.ID, w.UserID, ip, w.Host, w.Event, w.Timestamp, w.TimeSpent, w.Path, bytes},
+			Statement: "insert into web_tracking (_id, user_id, ip, host, event, timestamp, timespent, path, lattitude, longitude, metadata) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			Values:    []interface{}{w.ID, w.UserID, ip, w.Host, w.Event, w.Timestamp, w.TimeSpent, w.Path, w.Lattitude, w.Longitude, bytes},
 		},
 	}, nil
 }
