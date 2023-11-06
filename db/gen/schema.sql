@@ -654,7 +654,7 @@ create table
     `timestamp` datetime not null,
     `timespent` bigint default NULL,
     `path` varchar(255) not null,
-    `lattitude` double not null,
-    `longitude` double not null,
+    `lattitude` double,
+    `longitude` double,
     `metadata` json
 )

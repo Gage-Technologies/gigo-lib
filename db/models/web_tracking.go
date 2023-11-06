@@ -52,10 +52,10 @@ type WebTracking struct {
 	Path string `json:"path" sql:"path"`
 
 	// Lattitude The lattitude of the client making the request
-	Lattitude float64 `json:"lattitude" sql:"lattitude"`
+	Lattitude *float64 `json:"lattitude" sql:"lattitude"`
 
 	// Longitude The longitude of the client making the request
-	Longitude float64 `json:"longitude" sql:"longitude"`
+	Longitude *float64 `json:"longitude" sql:"longitude"`
 
 	// Metadata
 	Metadata map[string]interface{} `json:"metadata" sql:"metadata"`
@@ -70,13 +70,14 @@ type WebTrackingSQL struct {
 	Timestamp time.Time        `json:"timestamp" sql:"timestamp"`
 	TimeSpent *time.Duration   `json:"timespent" sql:"timespent"`
 	Path      string           `json:"path" sql:"path"`
-	Lattitude float64          `json:"lattitude" sql:"lattitude"`
-	Longitude float64          `json:"longitude" sql:"longitude"`
+	Lattitude *float64         `json:"lattitude" sql:"lattitude"`
+	Longitude *float64         `json:"longitude" sql:"longitude"`
 	Metadata  []byte           `json:"metadata" sql:"metadata"`
 }
 
 func CreateWebTracking(_id int64, userId *int64, ip net.IP, host string, event WebTrackingEvent,
-	timestamp time.Time, timespent *time.Duration, path string, lattitude float64, longitude float64, metadata map[string]interface{}) *WebTracking {
+	timestamp time.Time, timespent *time.Duration, path string, lattitude *float64, longitude *float64,
+	metadata map[string]interface{}) *WebTracking {
 	return &WebTracking{
 		ID:        _id,
 		UserID:    userId,
@@ -86,6 +87,8 @@ func CreateWebTracking(_id int64, userId *int64, ip net.IP, host string, event W
 		Timestamp: timestamp,
 		TimeSpent: timespent,
 		Path:      path,
+		Lattitude: lattitude,
+		Longitude: longitude,
 		Metadata:  metadata,
 	}
 }
@@ -99,9 +102,11 @@ func WebTrackingFromSqlNative(rows *sql.Rows) (*WebTracking, error) {
 
 	// parse the json from bytes
 	var metadata map[string]interface{}
-	err = json.Unmarshal(usage.Metadata, &metadata)
-	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal metadata: %v", err)
+	if len(usage.Metadata) > 0 {
+		err = json.Unmarshal(usage.Metadata, &metadata)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshal metadata: %v", err)
+		}
 	}
 
 	wt := &WebTracking{
@@ -125,9 +130,13 @@ func WebTrackingFromSqlNative(rows *sql.Rows) (*WebTracking, error) {
 
 func (w *WebTracking) ToSqlNative() ([]SQLInsertStatement, error) {
 	// serialize the metadata as JSON
-	bytes, err := json.Marshal(w.Metadata)
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal metadata: %v", err)
+	var bytes []byte
+	if w.Metadata != nil {
+		var err error
+		bytes, err = json.Marshal(w.Metadata)
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal metadata: %v", err)
+		}
 	}
 
 	// convert the ip to an integer
