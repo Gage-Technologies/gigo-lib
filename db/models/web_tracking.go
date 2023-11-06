@@ -67,10 +67,10 @@ type WebTrackingSQL struct {
 	Metadata  []byte           `json:"metadata" sql:"metadata"`
 }
 
-func CreateWebTracking(_id int64, userId int64, ip net.IP, host string, event WebTrackingEvent, timestamp time.Time, timespent *time.Duration, path string, metadata map[string]interface{}) *WebTracking {
+func CreateWebTracking(_id int64, userId *int64, ip net.IP, host string, event WebTrackingEvent, timestamp time.Time, timespent *time.Duration, path string, metadata map[string]interface{}) *WebTracking {
 	return &WebTracking{
 		ID:        _id,
-		UserID:    &userId,
+		UserID:    userId,
 		IP:        ip,
 		Host:      host,
 		Event:     event,
