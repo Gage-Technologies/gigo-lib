@@ -15,6 +15,7 @@ type WebTrackingEvent string
 
 const (
 	PageVisit     WebTrackingEvent = "pagevisit"
+	PageExit      WebTrackingEvent = "pageexit"
 	LoginStart    WebTrackingEvent = "loginstart"
 	Login         WebTrackingEvent = "login"
 	Logout        WebTrackingEvent = "logout"
