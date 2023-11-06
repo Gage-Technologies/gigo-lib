@@ -19,7 +19,7 @@ const (
 	LoginStart    WebTrackingEvent = "loginstart"
 	Login         WebTrackingEvent = "login"
 	Logout        WebTrackingEvent = "logout"
-	SignupStart   WebTrackingEvent = "signup"
+	SignupStart   WebTrackingEvent = "signupstart"
 	Signup        WebTrackingEvent = "signup"
 	ResetPassword WebTrackingEvent = "resetpassword"
 )
