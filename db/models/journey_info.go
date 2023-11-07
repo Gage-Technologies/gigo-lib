@@ -8,48 +8,48 @@ import (
 )
 
 type JourneyInfo struct {
-	ID               int64  `json:"_id" sql:"_id"`
-	UserID           int64  `json:"user_id" sql:"user_id"`
-	LearningGoal     string `json:"learning_goal" sql:"learning_goal"`
-	SelectedLanguage string `json:"selected_language" sql:"selected_language"`
-	EndGoal          string `json:"end_goal" sql:"end_goal"`
-	ExperienceLevel  string `json:"experience_level" sql:"experience_level"`
-	FamiliarityIDE   string `json:"familiarity_ide" sql:"familiarity_ide"`
-	FamiliarityLinux string `json:"familiarity_linux" sql:"familiarity_linux"`
-	Tried            string `json:"tried" sql:"tried"`
-	TriedOnline      string `json:"tried_online" sql:"tried_online"`
-	AptitudeLevel    string `json:"aptitude_level" sql:"aptitude_level"`
+	ID               int64               `json:"_id" sql:"_id"`
+	UserID           int64               `json:"user_id" sql:"user_id"`
+	LearningGoal     string              `json:"learning_goal" sql:"learning_goal"`
+	SelectedLanguage ProgrammingLanguage `json:"selected_language" sql:"selected_language"`
+	EndGoal          string              `json:"end_goal" sql:"end_goal"`
+	ExperienceLevel  string              `json:"experience_level" sql:"experience_level"`
+	FamiliarityIDE   string              `json:"familiarity_ide" sql:"familiarity_ide"`
+	FamiliarityLinux string              `json:"familiarity_linux" sql:"familiarity_linux"`
+	Tried            string              `json:"tried" sql:"tried"`
+	TriedOnline      string              `json:"tried_online" sql:"tried_online"`
+	AptitudeLevel    string              `json:"aptitude_level" sql:"aptitude_level"`
 }
 
 type JourneyInfoSQL struct {
-	ID               int64  `json:"_id" sql:"_id"`
-	UserID           int64  `json:"user_id" sql:"user_id"`
-	LearningGoal     string `json:"learning_goal" sql:"learning_goal"`
-	SelectedLanguage string `json:"selected_language" sql:"selected_language"`
-	EndGoal          string `json:"end_goal" sql:"end_goal"`
-	ExperienceLevel  string `json:"experience_level" sql:"experience_level"`
-	FamiliarityIDE   string `json:"familiarity_ide" sql:"familiarity_ide"`
-	FamiliarityLinux string `json:"familiarity_linux" sql:"familiarity_linux"`
-	Tried            string `json:"tried" sql:"tried"`
-	TriedOnline      string `json:"tried_online" sql:"tried_online"`
-	AptitudeLevel    string `json:"aptitude_level" sql:"aptitude_level"`
+	ID               int64               `json:"_id" sql:"_id"`
+	UserID           int64               `json:"user_id" sql:"user_id"`
+	LearningGoal     string              `json:"learning_goal" sql:"learning_goal"`
+	SelectedLanguage ProgrammingLanguage `json:"selected_language" sql:"selected_language"`
+	EndGoal          string              `json:"end_goal" sql:"end_goal"`
+	ExperienceLevel  string              `json:"experience_level" sql:"experience_level"`
+	FamiliarityIDE   string              `json:"familiarity_ide" sql:"familiarity_ide"`
+	FamiliarityLinux string              `json:"familiarity_linux" sql:"familiarity_linux"`
+	Tried            string              `json:"tried" sql:"tried"`
+	TriedOnline      string              `json:"tried_online" sql:"tried_online"`
+	AptitudeLevel    string              `json:"aptitude_level" sql:"aptitude_level"`
 }
 
 type JourneyInfoFrontend struct {
-	ID               string `json:"_id" sql:"_id"`
-	UserID           string `json:"user_id" sql:"user_id"`
-	LearningGoal     string `json:"learning_goal" sql:"learning_goal"`
-	SelectedLanguage string `json:"selected_language" sql:"selected_language"`
-	EndGoal          string `json:"end_goal" sql:"end_goal"`
-	ExperienceLevel  string `json:"experience_level" sql:"experience_level"`
-	FamiliarityIDE   string `json:"familiarity_ide" sql:"familiarity_ide"`
-	FamiliarityLinux string `json:"familiarity_linux" sql:"familiarity_linux"`
-	Tried            string `json:"tried" sql:"tried"`
-	TriedOnline      string `json:"tried_online" sql:"tried_online"`
-	AptitudeLevel    string `json:"aptitude_level" sql:"aptitude_level"`
+	ID               string              `json:"_id" sql:"_id"`
+	UserID           string              `json:"user_id" sql:"user_id"`
+	LearningGoal     string              `json:"learning_goal" sql:"learning_goal"`
+	SelectedLanguage ProgrammingLanguage `json:"selected_language" sql:"selected_language"`
+	EndGoal          string              `json:"end_goal" sql:"end_goal"`
+	ExperienceLevel  string              `json:"experience_level" sql:"experience_level"`
+	FamiliarityIDE   string              `json:"familiarity_ide" sql:"familiarity_ide"`
+	FamiliarityLinux string              `json:"familiarity_linux" sql:"familiarity_linux"`
+	Tried            string              `json:"tried" sql:"tried"`
+	TriedOnline      string              `json:"tried_online" sql:"tried_online"`
+	AptitudeLevel    string              `json:"aptitude_level" sql:"aptitude_level"`
 }
 
-func CreateJourneyInfo(id int64, userId int64, learningGoal string, language string, endGoal string,
+func CreateJourneyInfo(id int64, userId int64, learningGoal string, language ProgrammingLanguage, endGoal string,
 	experienceLevel string, familiarityIDE string, familiarityLinux string, tried string, triedOnline string,
 	aptitudeLevel string) (*JourneyInfo, error) {
 
