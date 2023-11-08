@@ -113,7 +113,7 @@ type PostFrontend struct {
 	Deleted                     bool                  `json:"deleted" sql:"deleted"`
 	ExclusiveDescription        *string               `json:"exclusive_description"`
 	EstimatedTutorialTimeMillis *int64                `json:"estimated_tutorial_time_millis"`
-	StartTime                   *int64                `json:"start_time"`
+	StartTimeMillis             *int64                `json:"start_time_millis"`
 }
 
 func CreatePost(id int64, title string, description string, author string, authorID int64, createdAt time.Time,
@@ -399,7 +399,7 @@ func (i *Post) ToFrontend() (*PostFrontend, error) {
 		Thumbnail:                   fmt.Sprintf("/static/posts/t/%v", i.ID),
 		ExclusiveDescription:        i.ExclusiveDescription,
 		EstimatedTutorialTimeMillis: estimatedTime,
-		StartTime:                   startTime,
+		StartTimeMillis:             startTime,
 	}
 
 	return mf, nil

@@ -71,17 +71,17 @@ type AttemptFrontend struct {
 	RepoID      string    `json:"repo_id" sql:"repo_id"`
 	AuthorTier  TierType  `json:"author_tier" sql:"author_tier"`
 	//Awards        []string   `json:"awards" sql:"awards"`
-	Coffee         string        `json:"coffee" sql:"coffee"`
-	PostID         string        `json:"post_id" sql:"post_id"`
-	Closed         bool          `json:"closed" sql:"closed"`
-	Success        bool          `json:"success" sql:"success"`
-	ClosedDate     *time.Time    `json:"closed_date" sql:"closed_date"`
-	Tier           TierType      `json:"tier" sql:"tier"`
-	ParentAttempt  *string       `json:"parent_attempt" sql:"parent_attempt"`
-	Thumbnail      string        `json:"thumbnail"`
-	PostType       ChallengeType `json:"post_type" sql:"post_type"`
-	PostTypeString string        `json:"post_type_string" sql:"post_type_string"`
-	StartTime      *int64        `json:"start_time" sql:"start_time"`
+	Coffee          string        `json:"coffee" sql:"coffee"`
+	PostID          string        `json:"post_id" sql:"post_id"`
+	Closed          bool          `json:"closed" sql:"closed"`
+	Success         bool          `json:"success" sql:"success"`
+	ClosedDate      *time.Time    `json:"closed_date" sql:"closed_date"`
+	Tier            TierType      `json:"tier" sql:"tier"`
+	ParentAttempt   *string       `json:"parent_attempt" sql:"parent_attempt"`
+	Thumbnail       string        `json:"thumbnail"`
+	PostType        ChallengeType `json:"post_type" sql:"post_type"`
+	PostTypeString  string        `json:"post_type_string" sql:"post_type_string"`
+	StartTimeMillis *int64        `json:"start_time_millis" sql:"start_time_millis"`
 }
 
 func CreateAttempt(id int64, postTitle string, description string, author string, authorID int64, createdAt time.Time, updatedAt time.Time,
@@ -210,17 +210,17 @@ func (i *Attempt) ToFrontend() *AttemptFrontend {
 		RepoID:      fmt.Sprintf("%d", i.RepoID),
 		AuthorTier:  i.AuthorTier,
 		//Awards:        awards,
-		PostID:         fmt.Sprintf("%d", i.PostID),
-		Coffee:         fmt.Sprintf("%d", i.Coffee),
-		Closed:         i.Closed,
-		Success:        i.Success,
-		ClosedDate:     i.ClosedDate,
-		Tier:           i.Tier,
-		ParentAttempt:  parentAttempt,
-		Thumbnail:      fmt.Sprintf("/static/posts/t/%v", i.PostID),
-		PostType:       i.PostType,
-		PostTypeString: i.PostType.String(),
-		StartTime:      startTime,
+		PostID:          fmt.Sprintf("%d", i.PostID),
+		Coffee:          fmt.Sprintf("%d", i.Coffee),
+		Closed:          i.Closed,
+		Success:         i.Success,
+		ClosedDate:      i.ClosedDate,
+		Tier:            i.Tier,
+		ParentAttempt:   parentAttempt,
+		Thumbnail:       fmt.Sprintf("/static/posts/t/%v", i.PostID),
+		PostType:        i.PostType,
+		PostTypeString:  i.PostType.String(),
+		StartTimeMillis: startTime,
 	}
 
 	return mf
