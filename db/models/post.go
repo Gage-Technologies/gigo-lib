@@ -45,6 +45,7 @@ type Post struct {
 	ExclusiveDescription    *string               `json:"exclusive_description,omitempty" sql:"exclusive_description"`
 	ShareHash               *uuid.UUID            `json:"share_hash" sql:"share_hash"`
 	EstimatedTutorialTime   *time.Duration        `json:"estimated_tutorial_time,omitempty" sql:"estimated_tutorial_time"`
+	StartTime               *time.Duration        `json:"start_time,omitempty" sql:"start_time"`
 }
 
 type PostSQL struct {
@@ -76,6 +77,7 @@ type PostSQL struct {
 	ExclusiveDescription    *string        `json:"exclusive_description" sql:"exclusive_description"`
 	ShareHash               *uuid.UUID     `json:"share_hash" sql:"share_hash"`
 	EstimatedTutorialTime   *time.Duration `json:"estimated_tutorial_time" sql:"estimated_tutorial_time"`
+	StartTime               *time.Duration `json:"start_time" sql:"start_time"`
 }
 
 type PostFrontend struct {
@@ -111,6 +113,7 @@ type PostFrontend struct {
 	Deleted                     bool                  `json:"deleted" sql:"deleted"`
 	ExclusiveDescription        *string               `json:"exclusive_description"`
 	EstimatedTutorialTimeMillis *int64                `json:"estimated_tutorial_time_millis"`
+	StartTime                   *int64                `json:"start_time"`
 }
 
 func CreatePost(id int64, title string, description string, author string, authorID int64, createdAt time.Time,
@@ -275,6 +278,7 @@ func PostFromSQLNative(db *ti.Database, rows *sql.Rows) (*Post, error) {
 		ExclusiveDescription:    postSQL.ExclusiveDescription,
 		ShareHash:               postSQL.ShareHash,
 		EstimatedTutorialTime:   postSQL.EstimatedTutorialTime,
+		StartTime:               postSQL.StartTime,
 	}
 
 	return post, nil
@@ -348,17 +352,18 @@ func (i *Post) ToFrontend() (*PostFrontend, error) {
 		}, nil
 	}
 
-	// // hash id for thumbnail path
-	// idHash, err := utils.HashData([]byte(fmt.Sprintf("%d", i.ID)))
-	// if err != nil {
-	//	return nil, fmt.Errorf("failed to hash post id: %v", err)
-	// }
-
 	// conditionally load the estimated time
 	var estimatedTime *int64
 	if i.EstimatedTutorialTime != nil {
 		millis := i.EstimatedTutorialTime.Milliseconds()
 		estimatedTime = &millis
+	}
+
+	// conditionally load the start time
+	var startTime *int64
+	if i.StartTime != nil {
+		millis := i.StartTime.Milliseconds()
+		startTime = &millis
 	}
 
 	// create new post frontend
@@ -394,6 +399,7 @@ func (i *Post) ToFrontend() (*PostFrontend, error) {
 		Thumbnail:                   fmt.Sprintf("/static/posts/t/%v", i.ID),
 		ExclusiveDescription:        i.ExclusiveDescription,
 		EstimatedTutorialTimeMillis: estimatedTime,
+		StartTime:                   startTime,
 	}
 
 	return mf, nil
@@ -413,11 +419,11 @@ func (i *Post) ToSQLNative() ([]*SQLInsertStatement, error) {
 	// create slice to hold insertion statements for this post and initialize the slice with the main post insertion statement
 	sqlStatements := []*SQLInsertStatement{
 		{
-			Statement: "insert ignore into post(_id, title, description, author, author_id, created_at, updated_at, repo_id, top_reply, tier, coffee, post_type, views, completions, attempts, published, visibility, stripe_price_id, challenge_cost, workspace_config, workspace_config_revision, workspace_settings, leads, embedded, deleted, exclusive_description, share_hash, estimated_tutorial_time) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, uuid_to_bin(?), ?);",
+			Statement: "insert ignore into post(_id, title, description, author, author_id, created_at, updated_at, repo_id, top_reply, tier, coffee, post_type, views, completions, attempts, published, visibility, stripe_price_id, challenge_cost, workspace_config, workspace_config_revision, workspace_settings, leads, embedded, deleted, exclusive_description, share_hash, estimated_tutorial_time, start_time) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, uuid_to_bin(?), ?, ?);",
 			Values: []interface{}{i.ID, i.Title, i.Description, i.Author, i.AuthorID, i.CreatedAt, i.UpdatedAt, i.RepoID,
 				i.TopReply, i.Tier, i.Coffee, i.PostType, i.Views, i.Completions, i.Attempts, i.Published, i.Visibility,
 				i.StripePriceId, i.ChallengeCost, i.WorkspaceConfig, i.WorkspaceConfigRevision, buf, i.Leads, i.Embedded,
-				i.Deleted, i.ExclusiveDescription, i.ShareHash, i.EstimatedTutorialTime,
+				i.Deleted, i.ExclusiveDescription, i.ShareHash, i.EstimatedTutorialTime, i.StartTime,
 			},
 		},
 	}

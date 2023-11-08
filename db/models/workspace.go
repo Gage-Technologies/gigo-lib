@@ -5,8 +5,9 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"github.com/kisielk/sqlstruct"
 	"time"
+
+	"github.com/kisielk/sqlstruct"
 )
 
 type WorkspaceState int
@@ -163,6 +164,7 @@ type Workspace struct {
 	Ports             []WorkspacePort       `json:"ports" sql:"ports"`
 	IsEphemeral       bool                  `json:"is_ephemeral" sql:"is_ephemeral"`
 	IsVNC             bool                  `json:"is_vnc" sql:"is_vnc"`
+	StartTime         *time.Duration        `json:"start_time" sql:"start_time"`
 }
 
 type WorkspaceSQL struct {
@@ -184,6 +186,7 @@ type WorkspaceSQL struct {
 	Ports             []byte             `json:"ports" sql:"ports"`
 	IsEphemeral       bool               `json:"is_ephemeral" sql:"is_ephemeral"`
 	IsVNC             bool               `json:"is_vnc" sql:"is_vnc"`
+	StartTime         *time.Duration     `json:"start_time" sql:"start_time"`
 }
 
 type WorkspaceFrontend struct {
@@ -307,6 +310,7 @@ func WorkspaceFromSQLNative(rows *sql.Rows) (*Workspace, error) {
 		Ports:             workspacePorts,
 		IsEphemeral:       workspaceSQL.IsEphemeral,
 		IsVNC:             workspaceSQL.IsVNC,
+		StartTime:         workspaceSQL.StartTime,
 	}
 
 	return workspace, nil
@@ -396,9 +400,9 @@ func (w *Workspace) ToSQLNative() ([]*SQLInsertStatement, error) {
 
 	return []*SQLInsertStatement{
 		{
-			Statement: "insert ignore into workspaces(_id, code_source_id, code_source_type, repo_id, created_at, owner_id, template_id, expiration, commit, state, init_state, init_failure, last_state_update, workspace_settings, over_allocated, ports, is_ephemeral, is_vnc) " +
-				"values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
-			Values: []interface{}{w.ID, w.CodeSourceID, w.CodeSourceType, w.RepoID, w.CreatedAt, w.OwnerID, w.TemplateID, w.Expiration, w.Commit, w.State, w.InitState, initFailureBytes, w.LastStateUpdate, wsSettingsBytes, wsOverAllocatedBytes, wsPorts, w.IsEphemeral, w.IsVNC},
+			Statement: "insert ignore into workspaces(_id, code_source_id, code_source_type, repo_id, created_at, owner_id, template_id, expiration, commit, state, init_state, init_failure, last_state_update, workspace_settings, over_allocated, ports, is_ephemeral, is_vnc, start_time) " +
+				"values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+			Values: []interface{}{w.ID, w.CodeSourceID, w.CodeSourceType, w.RepoID, w.CreatedAt, w.OwnerID, w.TemplateID, w.Expiration, w.Commit, w.State, w.InitState, initFailureBytes, w.LastStateUpdate, wsSettingsBytes, wsOverAllocatedBytes, wsPorts, w.IsEphemeral, w.IsVNC, w.StartTime},
 		},
 	}, nil
 }

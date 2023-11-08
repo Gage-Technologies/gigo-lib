@@ -58,7 +58,8 @@ create table
         tier int not null,
         parent_attempt bigint,
         workspace_settings json,
-        post_type int not null
+        post_type int not null,
+        start_time bigint
     );
 
 create table
@@ -282,7 +283,8 @@ create table
         deleted boolean not null default false,
         exclusive_description varchar(500),
         share_hash varchar(16),
-        estimated_tutorial_time bigint
+        estimated_tutorial_time bigint,
+        start_time bigint
     );
 
 create table
@@ -481,16 +483,17 @@ create table
         owner_id bigint not null,
         template_id bigint not null,
         expiration datetime not null,
-        commit
-            varchar(64) not null,
-            state bigint not null,
-            init_state int not null,
-            init_failure json,
-            last_state_update datetime not null,
-            workspace_settings json not null,
-            over_allocated json,
-            ports json,
-            is_ephemeral boolean not null default false
+        commit varchar(64) not null,
+        state bigint not null,
+        init_state int not null,
+        init_failure json,
+        last_state_update datetime not null,
+        workspace_settings json not null,
+        over_allocated json,
+        ports json,
+        is_ephemeral boolean not null default false,
+        is_vnc boolean not null default false,
+        start_time bigint
     );
 
 create table

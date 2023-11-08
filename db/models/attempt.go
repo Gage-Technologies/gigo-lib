@@ -6,9 +6,10 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"time"
+
 	"github.com/kisielk/sqlstruct"
 	"go.opentelemetry.io/otel"
-	"time"
 
 	ti "github.com/gage-technologies/gigo-lib/db"
 )
@@ -33,6 +34,7 @@ type Attempt struct {
 	ParentAttempt     *int64             `json:"parent_attempt" sql:"parent_attempt"`
 	WorkspaceSettings *WorkspaceSettings `json:"workspace_settings" sql:"workspace_settings"`
 	PostType          ChallengeType      `json:"post_type" sql:"post_type"`
+	StartTime         *time.Duration     `json:"start_time" sql:"start_time"`
 }
 
 type AttemptSQL struct {
@@ -46,15 +48,16 @@ type AttemptSQL struct {
 	RepoID      int64     `json:"repo_id" sql:"repo_id"`
 	AuthorTier  TierType  `json:"author_tier" sql:"author_tier"`
 	//Awards            []byte     `json:"awards" sql:"awards"`
-	Coffee            uint64        `json:"coffee" sql:"coffee"`
-	PostID            int64         `json:"post_id" sql:"post_id"`
-	Closed            bool          `json:"closed" sql:"closed"`
-	Success           bool          `json:"success" sql:"success"`
-	ClosedDate        *time.Time    `json:"closed_date" sql:"closed_date"`
-	Tier              TierType      `json:"tier" sql:"tier"`
-	ParentAttempt     *int64        `json:"parent_attempt" sql:"parent_attempt"`
-	WorkspaceSettings []byte        `json:"workspace_settings" sql:"workspace_settings"`
-	PostType          ChallengeType `json:"post_type" sql:"post_type"`
+	Coffee            uint64         `json:"coffee" sql:"coffee"`
+	PostID            int64          `json:"post_id" sql:"post_id"`
+	Closed            bool           `json:"closed" sql:"closed"`
+	Success           bool           `json:"success" sql:"success"`
+	ClosedDate        *time.Time     `json:"closed_date" sql:"closed_date"`
+	Tier              TierType       `json:"tier" sql:"tier"`
+	ParentAttempt     *int64         `json:"parent_attempt" sql:"parent_attempt"`
+	WorkspaceSettings []byte         `json:"workspace_settings" sql:"workspace_settings"`
+	PostType          ChallengeType  `json:"post_type" sql:"post_type"`
+	StartTime         *time.Duration `json:"start_time" sql:"start_time"`
 }
 
 type AttemptFrontend struct {
@@ -78,6 +81,7 @@ type AttemptFrontend struct {
 	Thumbnail      string        `json:"thumbnail"`
 	PostType       ChallengeType `json:"post_type" sql:"post_type"`
 	PostTypeString string        `json:"post_type_string" sql:"post_type_string"`
+	StartTime      *int64        `json:"start_time" sql:"start_time"`
 }
 
 func CreateAttempt(id int64, postTitle string, description string, author string, authorID int64, createdAt time.Time, updatedAt time.Time,
@@ -167,6 +171,7 @@ func AttemptFromSQLNative(db *ti.Database, rows *sql.Rows) (*Attempt, error) {
 		ParentAttempt:     attemptSQL.ParentAttempt,
 		WorkspaceSettings: workspaceSettings,
 		PostType:          attemptSQL.PostType,
+		StartTime:         attemptSQL.StartTime,
 	}
 
 	return attempt, nil
@@ -184,6 +189,13 @@ func (i *Attempt) ToFrontend() *AttemptFrontend {
 	if i.ParentAttempt != nil {
 		pa := fmt.Sprintf("%d", *i.ParentAttempt)
 		parentAttempt = &pa
+	}
+
+	// consitionally load start time to millis
+	var startTime *int64
+	if i.StartTime != nil {
+		t := i.StartTime.Milliseconds()
+		startTime = &t
 	}
 
 	// create new attempt frontend
@@ -208,6 +220,7 @@ func (i *Attempt) ToFrontend() *AttemptFrontend {
 		Thumbnail:      fmt.Sprintf("/static/posts/t/%v", i.PostID),
 		PostType:       i.PostType,
 		PostTypeString: i.PostType.String(),
+		StartTime:      startTime,
 	}
 
 	return mf
@@ -240,9 +253,9 @@ func (i *Attempt) ToSQLNative() ([]*SQLInsertStatement, error) {
 
 	sqlStatements = append(sqlStatements, &SQLInsertStatement{
 		Statement: "insert ignore into attempt(_id, post_title, description, author, author_id, created_at, updated_at, repo_id, " +
-			"author_tier, coffee, post_id, closed, success, closed_date, tier, parent_attempt, workspace_settings, post_type) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+			"author_tier, coffee, post_id, closed, success, closed_date, tier, parent_attempt, workspace_settings, post_type, start_time) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
 		Values: []interface{}{i.ID, i.PostTitle, i.Description, i.Author, i.AuthorID, i.CreatedAt, i.UpdatedAt, i.RepoID, i.AuthorTier,
-			i.Coffee, i.PostID, i.Closed, i.Success, i.ClosedDate, i.Tier, i.ParentAttempt, buf, i.PostType},
+			i.Coffee, i.PostID, i.Closed, i.Success, i.ClosedDate, i.Tier, i.ParentAttempt, buf, i.PostType, i.StartTime},
 	})
 
 	// create insertion statement and return
