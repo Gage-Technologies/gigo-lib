@@ -359,6 +359,88 @@ func (l ProgrammingLanguage) String() string {
 	}
 }
 
+func ProgrammingLanguageFromString(val string) ProgrammingLanguage {
+	switch val {
+	case "Any":
+		return AnyProgrammingLanguage
+	case "Java":
+		return Java
+	case "JavaScript":
+		return JavaScript
+	case "TypeScript":
+		return TypeScript
+	case "Python":
+		return Python
+	case "Go":
+		return Go
+	case "Ruby":
+		return Ruby
+	case "Cpp":
+		return Cpp
+	case "C":
+		return C
+	case "Csharp":
+		return Csharp
+	case "ObjectiveC":
+		return ObjectiveC
+	case "Swift":
+		return Swift
+	case "PHP":
+		return PHP
+	case "Rust":
+		return Rust
+	case "Kotlin":
+		return Kotlin
+	case "Dart":
+		return Dart
+	case "Scala":
+		return Scala
+	case "CoffeeScript":
+		return CoffeeScript
+	case "Haskell":
+		return Haskell
+	case "Lua":
+		return Lua
+	case "Clojure":
+		return Clojure
+	case "Perl":
+		return Perl
+	case "Shell":
+		return Shell
+	case "Elixir":
+		return Elixir
+	case "Assembly":
+		return Assembly
+	case "Groovy":
+		return Groovy
+	case "Html":
+		return Html
+	case "Julia":
+		return Julia
+	case "OCaml":
+		return OCaml
+	case "R":
+		return R
+	case "Ada":
+		return Ada
+	case "Erlang":
+		return Erlang
+	case "Matlab":
+		return Matlab
+	case "SQL":
+		return SQL
+	case "Cobol":
+		return Cobol
+	case "Lisp":
+		return Lisp
+	case "HCL":
+		return HCL
+	default:
+		return AnyProgrammingLanguage
+
+	}
+}
+
 //////////////////////////////////////////////
 
 type CommunicationType int

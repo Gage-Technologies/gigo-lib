@@ -11,11 +11,12 @@ import (
 	"time"
 )
 
-type JourneyUnitProjects struct {
+type JourneyUnitProjectAttempts struct {
 	ID                    int64                  `json:"_id" sql:"_id"`
 	UnitID                int64                  `json:"unit_id" sql:"unit_id"`
+	ParentProject         int64                  `json:"parent_project" sql:"parent_project"`
+	IsCompleted           bool                   `json:"is_completed" sql:"is_completed"`
 	WorkingDirectory      string                 `json:"working_directory" sql:"working_directory"`
-	Completions           int64                  `json:"completions" sql:"completions"`
 	Title                 string                 `json:"title" sql:"title"`
 	Description           string                 `json:"description" sql:"description"`
 	ProjectLanguage       ProgrammingLanguage    `json:"project_language" sql:"project_language"`
@@ -24,20 +25,23 @@ type JourneyUnitProjects struct {
 	EstimatedTutorialTime *time.Duration         `json:"estimated_tutorial_time,omitempty" sql:"estimated_tutorial_time"`
 }
 
-type JourneyUnitProjectsSQL struct {
+type JourneyUnitProjectAttemptsSQL struct {
 	ID                    int64               `json:"_id" sql:"_id"`
 	UnitID                int64               `json:"unit_id" sql:"unit_id"`
+	ParentProject         int64               `json:"parent_project" sql:"parent_project"`
+	IsCompleted           bool                `json:"is_completed" sql:"is_completed"`
 	WorkingDirectory      string              `json:"working_directory" sql:"working_directory"`
-	Completions           int64               `json:"completions" sql:"completions"`
 	Title                 string              `json:"title" sql:"title"`
 	Description           string              `json:"description" sql:"description"`
 	ProjectLanguage       ProgrammingLanguage `json:"project_language" sql:"project_language"`
 	EstimatedTutorialTime *time.Duration      `json:"estimated_tutorial_time,omitempty" sql:"estimated_tutorial_time"`
 }
 
-type JourneyUnitProjectsFrontend struct {
+type JourneyUnitProjectAttemptsFrontend struct {
 	ID                    string   `json:"_id" sql:"_id"`
 	UnitID                string   `json:"unit_id" sql:"unit_id"`
+	ParentProject         string   `json:"parent_project" sql:"parent_project"`
+	IsCompleted           bool     `json:"is_completed" sql:"is_completed"`
 	WorkingDirectory      string   `json:"working_directory" sql:"working_directory"`
 	Title                 string   `json:"title" sql:"title"`
 	Description           string   `json:"description" sql:"description"`
@@ -47,11 +51,11 @@ type JourneyUnitProjectsFrontend struct {
 	EstimatedTutorialTime *string  `json:"estimated_tutorial_time,omitempty" sql:"estimated_tutorial_time"`
 }
 
-func CreateJourneyUnitProjects(id int64, unitID int64, workingDirectory string, completions int64, title string, description string, projectLanguage ProgrammingLanguage, tags []string, dependencies []int64, estimatedTutorialTime *time.Duration) (*JourneyUnitProjects, error) {
+func CreateJourneyUnitProjectAttempts(id int64, unitID int64, parentProject int64, isCompleted bool, workingDirectory string, title string, description string, projectLanguage ProgrammingLanguage, tags []string, dependencies []int64, estimatedTutorialTime *time.Duration) (*JourneyUnitProjectAttempts, error) {
 	jTags := make([]*JourneyTags, 0)
 
 	for _, t := range tags {
-		jTags = append(jTags, CreateJourneyTags(id, t, JourneyUnitProjectType))
+		jTags = append(jTags, CreateJourneyTags(id, t, JourneyUnitProjectAttemptType))
 	}
 
 	jDependencies := make([]*JourneyDependencies, 0)
@@ -60,11 +64,12 @@ func CreateJourneyUnitProjects(id int64, unitID int64, workingDirectory string, 
 		jDependencies = append(jDependencies, CreateJourneyDependencies(id, l))
 	}
 
-	return &JourneyUnitProjects{
+	return &JourneyUnitProjectAttempts{
 		ID:                    id,
 		UnitID:                unitID,
+		ParentProject:         parentProject,
+		IsCompleted:           isCompleted,
 		WorkingDirectory:      workingDirectory,
-		Completions:           completions,
 		Title:                 title,
 		Description:           description,
 		ProjectLanguage:       projectLanguage,
@@ -74,8 +79,8 @@ func CreateJourneyUnitProjects(id int64, unitID int64, workingDirectory string, 
 	}, nil
 }
 
-func JourneyUnitProjectsFromSQLNative(db *ti.Database, rows *sql.Rows) (*JourneyUnitProjects, error) {
-	var journeyUnitProjects JourneyUnitProjectsSQL
+func JourneyUnitProjectAttemptsFromSQLNative(db *ti.Database, rows *sql.Rows) (*JourneyUnitProjectAttempts, error) {
+	var journeyUnitProjects JourneyUnitProjectAttemptsSQL
 
 	err := sqlstruct.Scan(&journeyUnitProjects, rows)
 	if err != nil {
@@ -85,10 +90,10 @@ func JourneyUnitProjectsFromSQLNative(db *ti.Database, rows *sql.Rows) (*Journey
 	ctx, span := otel.Tracer("gigo-core").Start(context.Background(), "gigo-lib")
 	defer span.End()
 
-	callerName := "JourneyUnitProjectsFromSQLNative"
+	callerName := "JourneyUnitFromSQLNative"
 
 	// query tag link table to get tab ids
-	tagRows, err := db.QueryContext(ctx, &span, &callerName, "select * from journey_tags where journey_id = ? and type = ?", journeyUnitProjects.ID, JourneyUnitProjectType)
+	tagRows, err := db.QueryContext(ctx, &span, &callerName, "select * from journey_tags where journey_id = ? and type = ?", journeyUnitProjects.ID, JourneyUnitProjectAttemptType)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query tag link table for tag ids: %v", err)
 	}
@@ -131,9 +136,11 @@ func JourneyUnitProjectsFromSQLNative(db *ti.Database, rows *sql.Rows) (*Journey
 
 	}
 
-	return &JourneyUnitProjects{
+	return &JourneyUnitProjectAttempts{
 		ID:                    journeyUnitProjects.ID,
 		UnitID:                journeyUnitProjects.UnitID,
+		ParentProject:         journeyUnitProjects.ParentProject,
+		IsCompleted:           journeyUnitProjects.IsCompleted,
 		WorkingDirectory:      journeyUnitProjects.WorkingDirectory,
 		Title:                 journeyUnitProjects.Title,
 		Description:           journeyUnitProjects.Description,
@@ -144,21 +151,21 @@ func JourneyUnitProjectsFromSQLNative(db *ti.Database, rows *sql.Rows) (*Journey
 	}, nil
 }
 
-func (i *JourneyUnitProjects) ToFrontend() *JourneyUnitProjectsFrontend {
+func (i *JourneyUnitProjectAttempts) ToFrontend() *JourneyUnitProjectAttemptsFrontend {
 	// create slice to hold tag ids in string form
 	tags := make([]string, 0)
 
 	// iterate tag ids formatting them to string format and saving them to the above slice
-	for b := range i.Tags {
-		tags = append(tags, fmt.Sprintf("%d", b))
+	for _, b := range i.Tags {
+		tags = append(tags, fmt.Sprintf("%d", b.Value))
 	}
 
 	// create slice to hold dependency ids in string form
 	dependencies := make([]string, 0)
 
 	// iterate tag ids formatting them to strong format and saving them to the above slice
-	for d := range i.Dependencies {
-		dependencies = append(dependencies, fmt.Sprintf("%d", d))
+	for _, d := range i.Dependencies {
+		dependencies = append(dependencies, fmt.Sprintf("%d", d.DepID))
 	}
 
 	var ett *string
@@ -168,9 +175,11 @@ func (i *JourneyUnitProjects) ToFrontend() *JourneyUnitProjectsFrontend {
 		ett = &ettI
 	}
 
-	return &JourneyUnitProjectsFrontend{
+	return &JourneyUnitProjectAttemptsFrontend{
 		ID:                    fmt.Sprintf("%d", i.ID),
 		UnitID:                fmt.Sprintf("%d", i.UnitID),
+		ParentProject:         fmt.Sprintf("%d", i.ParentProject),
+		IsCompleted:           i.IsCompleted,
 		WorkingDirectory:      i.WorkingDirectory,
 		Title:                 i.Title,
 		Description:           i.Description,
@@ -181,9 +190,8 @@ func (i *JourneyUnitProjects) ToFrontend() *JourneyUnitProjectsFrontend {
 	}
 }
 
-func (i *JourneyUnitProjects) ToSQLNative() []*SQLInsertStatement {
+func (i *JourneyUnitProjectAttempts) ToSQLNative() []*SQLInsertStatement {
 	sqlStatements := make([]*SQLInsertStatement, 0)
-
 	for _, deps := range i.Dependencies {
 		s := deps.ToSQLNative()
 		sqlStatements = append(sqlStatements, s...)
@@ -194,8 +202,8 @@ func (i *JourneyUnitProjects) ToSQLNative() []*SQLInsertStatement {
 	}
 
 	sqlStatements = append(sqlStatements, &SQLInsertStatement{
-		Statement: "insert ignore into journey_unit_projects (_id, unit_id, completions, working_directory, title, description, project_language, estimated_tutorial_time) values (?,?,?,?,?,?,?,?);",
-		Values:    []interface{}{i.ID, i.UnitID, i.Completions, i.WorkingDirectory, i.Title, i.Description, i.ProjectLanguage, i.EstimatedTutorialTime},
+		Statement: "insert ignore into journey_unit_project_attempts (_id, unit_id, parent_project, is_completed, working_directory, title, description, project_language, estimated_tutorial_time) values (?,?,?,?,?,?,?,?,?);",
+		Values:    []interface{}{i.ID, i.UnitID, i.ParentProject, i.IsCompleted, i.WorkingDirectory, i.Title, i.Description, i.ProjectLanguage, i.EstimatedTutorialTime},
 	})
 
 	return sqlStatements
