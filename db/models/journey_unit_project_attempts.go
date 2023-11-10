@@ -157,7 +157,7 @@ func (i *JourneyUnitProjectAttempts) ToFrontend() *JourneyUnitProjectAttemptsFro
 
 	// iterate tag ids formatting them to string format and saving them to the above slice
 	for _, b := range i.Tags {
-		tags = append(tags, fmt.Sprintf("%d", b.Value))
+		tags = append(tags, fmt.Sprintf("%v", b.Value))
 	}
 
 	// create slice to hold dependency ids in string form

@@ -9,3 +9,9 @@ create table if not exists user_inactivity(
       last_notified datetime not null,
       should_notify boolean not null
 )
+create table if not exists journey_tags (
+    journey_id bigint not null,
+    value varchar(255) not null,
+    type int not null,
+    primary key (journey_id, value)
+);

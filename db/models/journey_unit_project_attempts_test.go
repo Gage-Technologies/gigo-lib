@@ -1,25 +1,25 @@
 package models
 
 import (
-	"fmt"
 	ti "github.com/gage-technologies/gigo-lib/db"
 	"reflect"
 	"testing"
 	"time"
 )
 
-func TestCreateJourneyUnitProjects(t *testing.T) {
+func TestCreateJourneyUnitProjectAttempts(t *testing.T) {
 	estimatedCompletion := time.Minute * 8
 	tags := []string{"test-tag", "test-tag-2"}
 	dependencies := []int64{3, 4}
 
-	journey, err := CreateJourneyUnitProjects(
+	journey, err := CreateJourneyUnitProjectAttempts(
 		1,
 		69420,
+		2,
+		false,
 		"/codebase",
-		1,
-		"learn frontend lesson 1",
 		"a test project",
+		"this is a description",
 		Go,
 		tags,
 		dependencies,
@@ -45,12 +45,12 @@ func TestCreateJourneyUnitProjects(t *testing.T) {
 		return
 	}
 
-	if journey.Title != "learn frontend lesson 1" {
+	if journey.Title != "a test project" {
 		t.Errorf("failed to create journey unit projects with title: %s", journey.Title)
 		return
 	}
 
-	if journey.Description != "a test project" {
+	if journey.Description != "this is a description" {
 		t.Errorf("failed to create journey unit projects with description: %s", journey.Description)
 		return
 	}
@@ -79,18 +79,19 @@ func TestCreateJourneyUnitProjects(t *testing.T) {
 
 }
 
-func TestJourneyUnitProjects_ToSQLNative(t *testing.T) {
+func TestJourneyUnitProjectAttempts_ToSQLNative(t *testing.T) {
 	estimatedCompletion := time.Minute * 8
 	tags := []string{"test-tag", "test-tag-2"}
 	dependencies := []int64{3, 4}
 
-	journey, err := CreateJourneyUnitProjects(
+	journey, err := CreateJourneyUnitProjectAttempts(
 		1,
 		69420,
+		2,
+		false,
 		"/codebase",
-		1,
-		"learn frontend",
 		"a test project",
+		"this is a description",
 		Go,
 		tags,
 		dependencies,
@@ -106,38 +107,39 @@ func TestJourneyUnitProjects_ToSQLNative(t *testing.T) {
 
 	statement := journey.ToSQLNative()
 
-	if statement[len(statement)-1].Statement != "insert ignore into journey_unit_projects (_id, unit_id, completions, working_directory, title, description, project_language, estimated_tutorial_time) values (?,?,?,?,?,?,?,?);" {
+	if statement[len(statement)-1].Statement != "insert ignore into journey_unit_project_attempts (_id, unit_id, parent_project, is_completed, working_directory, title, description, project_language, estimated_tutorial_time) values (?,?,?,?,?,?,?,?,?);" {
 		t.Errorf("\nCreate Journey Unit Projects Failed\n    Error: wrong statement: \n%v", statement[len(statement)-1].Statement)
 		return
 	}
 
-	if len(statement[0].Values) != 2 {
-		t.Error("\nCreate Journey Unit Projects Failed\n    Error: wrong number of values")
+	if len(statement[len(statement)-1].Values) != 9 {
+		t.Errorf("\nCreate Journey Unit Projects Failed\n    Error: wrong number of values: %v", len(statement[len(statement)-1].Values))
 		return
 	}
 
 	t.Log("\ncreated journey unit projects")
 }
 
-func TestJourneyUnitProjectsFromSQLNative(t *testing.T) {
+func TestJourneyUnitProjectAttemptsFromSQLNative(t *testing.T) {
 	db, err := ti.CreateDatabase("gigo-dev-tidb", "4000", "mysql", "gigo-dev", "gigo-dev", "gigo_dev_test")
 	if err != nil {
 		t.Error("\nInitialize Database Failed\n    Error: ", err)
 	}
 
-	defer db.DB.Exec("delete from journey_unit_projects")
+	defer db.DB.Exec("delete from journey_unit_project_attempts")
 
 	estimatedCompletion := time.Minute * 8
 	tags := []string{"test-tag", "test-tag-2"}
 	dependencies := []int64{3, 4}
 
-	journey, err := CreateJourneyUnitProjects(
+	journey, err := CreateJourneyUnitProjectAttempts(
 		1,
 		69420,
+		2,
+		false,
 		"/codebase",
-		1,
-		"learn frontend",
 		"a test project",
+		"this is a description",
 		Go,
 		tags,
 		dependencies,
@@ -148,8 +150,6 @@ func TestJourneyUnitProjectsFromSQLNative(t *testing.T) {
 	}
 
 	statements := journey.ToSQLNative()
-
-	fmt.Println(statements[len(statements)-1].Statement, statements[len(statements)-1].Values)
 
 	for _, statement := range statements {
 		stmt, err := db.DB.Prepare(statement.Statement)
@@ -163,7 +163,7 @@ func TestJourneyUnitProjectsFromSQLNative(t *testing.T) {
 		}
 	}
 
-	rows, err := db.DB.Query("select * from journey_unit_projects where _id = ?", journey.ID)
+	rows, err := db.DB.Query("select * from journey_unit_project_attempts where _id = ?", journey.ID)
 	if err != nil {
 		t.Error("\nCreate Journey Unit Projects Failed\n    Error: ", err)
 		return
@@ -174,7 +174,7 @@ func TestJourneyUnitProjectsFromSQLNative(t *testing.T) {
 		return
 	}
 
-	j, err := JourneyUnitProjectsFromSQLNative(db, rows)
+	j, err := JourneyUnitProjectAttemptsFromSQLNative(db, rows)
 	if err != nil {
 		t.Error("\nCreate Journey Unit Projects Failed\n    Error: ", err)
 		return
@@ -195,12 +195,12 @@ func TestJourneyUnitProjectsFromSQLNative(t *testing.T) {
 		return
 	}
 
-	if j.Title != "learn frontend" {
+	if j.Title != "a test project" {
 		t.Errorf("\nCreate Journey Unit Projects Failed\n    Error: wrong title, got: %s", j.Title)
 		return
 	}
 
-	if j.Description != "a test project" {
+	if j.Description != "this is a description" {
 		t.Errorf("\nCreate Journey Unit Projects Failed\n    Error: wrong description, got: %s", j.Description)
 		return
 	}
@@ -211,7 +211,7 @@ func TestJourneyUnitProjectsFromSQLNative(t *testing.T) {
 	}
 
 	if *j.EstimatedTutorialTime != estimatedCompletion {
-		t.Errorf("\nCreate Journey Unit Projects Failed\n    Error: wrong estimated time completion, got: %s", j.EstimatedTutorialTime)
+		t.Errorf("\nCreate Journey Unit Projects Failed\n    Error: wrong estimated time completion, got: %s and %s", j.EstimatedTutorialTime, estimatedCompletion)
 		return
 	}
 

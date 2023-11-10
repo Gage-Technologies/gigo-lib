@@ -22,8 +22,10 @@ create table if not exists journey_unit_languages (
     unit_id bigint not null,
     value varchar(255) not null,
     is_attempt boolean not null default false,
-    primary key (unit_id, lang_id)
+    primary key (unit_id, value)
 );
+
+
 
 create table if not exists journey_unit_projects (
     _id bigint not null primary key,
@@ -33,14 +35,14 @@ create table if not exists journey_unit_projects (
     title varchar(50) not null,
     description varchar(500) not null,
     project_language int not null,
-    estimated_time_completion bigint
+    estimated_tutorial_time bigint
 );
 
 create table if not exists journey_unit_project_tags (
     journey_id bigint not null,
     value varchar(255) not null,
     type int not null,
-    primary key (journey_id, tag_id)
+    primary key (journey_id, value)
 );
 
 create table if not exists journey_unit_project_dependencies (
@@ -59,7 +61,7 @@ create table if not exists journey_unit_project_attempts (
     description varchar(500) not null,
     project_language int not null,
     estimated_tutorial_time bigint not null
-)
+);
 
 create table if not exists journey_unit_attempts (
     _id bigint not null primary key,
@@ -80,4 +82,4 @@ create table if not exists journey_unit_attempts (
     workspace_config_revision bigint not null,
     workspace_settings json,
     estimated_tutorial_time bigint
-)
+);

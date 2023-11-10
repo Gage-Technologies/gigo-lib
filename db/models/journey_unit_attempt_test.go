@@ -2,7 +2,6 @@ package models
 
 import (
 	"context"
-	"fmt"
 	ti "github.com/gage-technologies/gigo-lib/db"
 	"go.opentelemetry.io/otel"
 	"reflect"
@@ -10,13 +9,15 @@ import (
 	"time"
 )
 
-func TestCreateJourneyUnit(t *testing.T) {
-	journey, err := CreateJourneyUnit(
+func TestCreateJourneyUnitAttempt(t *testing.T) {
+	journey, err := CreateJourneyUnitAttempt(
 		1,
-		"Journey",
+		69420,
+		2,
+		"test-title",
 		UnitFocusFromString("Fullstack"),
 		[]ProgrammingLanguage{Go, Python, JavaScript},
-		"this is a test description",
+		"this a test description",
 		69420,
 		time.Now(),
 		time.Now(),
@@ -24,6 +25,7 @@ func TestCreateJourneyUnit(t *testing.T) {
 		Tier1,
 		&DefaultWorkspaceSettings,
 		69420,
+		0,
 		nil,
 	)
 	if err != nil {
@@ -41,7 +43,17 @@ func TestCreateJourneyUnit(t *testing.T) {
 		return
 	}
 
-	if journey.Title != "Journey" {
+	if journey.UserID != 69420 {
+		t.Error("\nCreate Journey Unit Failed\n    Error: wrong user id")
+		return
+	}
+
+	if journey.ParentUnit != 2 {
+		t.Error("\nCreate Journey Unit Failed\n    Error: wrong parent id")
+		return
+	}
+
+	if journey.Title != "test-title" {
 		t.Error("\nCreate Journey Unit Failed\n    Error: wrong name")
 		return
 	}
@@ -55,24 +67,24 @@ func TestCreateJourneyUnit(t *testing.T) {
 		{
 			1,
 			"Go",
-			false,
+			true,
 		},
 		{
 			1,
 			"Python",
-			false,
+			true,
 		},
 		{
 			1,
 			"JavaScript",
-			false,
+			true,
 		},
 	}) {
 		t.Errorf("\nCreate Journey Unit Failed\n    Error: wrong language list: \n%v\n%v\n%v", journey.LanguageList[0], journey.LanguageList[1], journey.LanguageList[2])
 		return
 	}
 
-	if journey.Description != "this is a test description" {
+	if journey.Description != "this a test description" {
 		t.Error("\nCreate Journey Unit Failed\n    Error: wrong description")
 		return
 	}
@@ -85,19 +97,22 @@ func TestCreateJourneyUnit(t *testing.T) {
 	t.Log("\nCreate Journey Unit Succeeded")
 }
 
-func TestJourneyUnit_ToSQLNative(t *testing.T) {
-	journey, err := CreateJourneyUnit(
+func TestJourneyUnitAttempt_ToSQLNative(t *testing.T) {
+	journey, err := CreateJourneyUnitAttempt(
 		1,
-		"Journey",
+		69420,
+		2,
+		"test-title",
 		UnitFocusFromString("Fullstack"),
 		[]ProgrammingLanguage{Go, Python, JavaScript},
-		"this is a test description",
+		"this a test description",
 		69420,
 		time.Now(),
 		time.Now(),
 		nil,
 		Tier1,
 		&DefaultWorkspaceSettings,
+		69420,
 		0,
 		nil,
 	)
@@ -112,12 +127,12 @@ func TestJourneyUnit_ToSQLNative(t *testing.T) {
 		return
 	}
 
-	if statement[len(statement)-1].Statement != "insert ignore into journey_units (_id, title, unit_focus, description, repo_id, created_at, updated_at, challenge_cost, completions, attempts, tier, embedded, workspace_config, workspace_config_revision, workspace_settings, estimated_tutorial_time) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);" {
+	if statement[len(statement)-1].Statement != "insert ignore into journey_unit_attempts (_id, title, user_id, parent_unit, unit_focus, description, repo_id, created_at, updated_at, challenge_cost, completions, attempts, tier, embedded, workspace_config, workspace_config_revision, workspace_settings, estimated_tutorial_time) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);" {
 		t.Error("\nJourney Unit To SQL Native Failed\n    Error: wrong statement")
 		return
 	}
 
-	if len(statement[len(statement)-1].Values) != 16 {
+	if len(statement[len(statement)-1].Values) != 18 {
 		t.Error("\nJourney Unit To SQL Native Failed\n    Error: wrong number of values")
 		return
 	}
@@ -125,25 +140,27 @@ func TestJourneyUnit_ToSQLNative(t *testing.T) {
 	t.Log("\nJourney Unit To SQL Native Succeeded")
 }
 
-func TestJourneyUnitFromSQLNative(t *testing.T) {
+func TestJourneyUnitAttemptFromSQLNative(t *testing.T) {
 	ctx, span := otel.Tracer("gigo-core").Start(context.Background(), "gigo-lib")
 	defer span.End()
 
-	callerName := "JourneyUnitFromSQLNativeTest"
+	callerName := "JourneyUnitAttemptFromSQLNativeTest"
 
 	db, err := ti.CreateDatabase("gigo-dev-tidb", "4000", "mysql", "gigo-dev", "gigo-dev", "gigo_dev_test")
 	if err != nil {
 		t.Error("\nInitialize Database Failed\n    Error: ", err)
 	}
 
-	defer db.DB.Exec("delete from journey_units")
+	defer db.DB.Exec("delete from journey_unit_attempts")
 
-	journey, err := CreateJourneyUnit(
+	journey, err := CreateJourneyUnitAttempt(
 		1,
-		"Journey",
+		69420,
+		2,
+		"test-title",
 		UnitFocusFromString("Fullstack"),
 		[]ProgrammingLanguage{Go, Python, JavaScript},
-		"this is a test description",
+		"this a test description",
 		69420,
 		time.Now(),
 		time.Now(),
@@ -151,6 +168,7 @@ func TestJourneyUnitFromSQLNative(t *testing.T) {
 		Tier1,
 		&DefaultWorkspaceSettings,
 		69420,
+		0,
 		nil,
 	)
 	if err != nil {
@@ -176,7 +194,7 @@ func TestJourneyUnitFromSQLNative(t *testing.T) {
 		}
 	}
 
-	rows, err := db.QueryContext(ctx, &span, &callerName, "select * from journey_units where _id = ?", journey.ID)
+	rows, err := db.QueryContext(ctx, &span, &callerName, "select * from journey_unit_attempts where _id = ?", journey.ID)
 	if err != nil {
 		t.Error("\nCreate Journey Unit Failed\n    Error: ", err)
 		return
@@ -184,10 +202,10 @@ func TestJourneyUnitFromSQLNative(t *testing.T) {
 
 	defer rows.Close()
 
-	var j *JourneyUnit
+	var j *JourneyUnitAttempt
 
 	for rows.Next() {
-		j, err = JourneyUnitFromSQLNative(db, rows)
+		j, err = JourneyUnitAttemptFromSQLNative(db, rows)
 		if err != nil {
 			t.Error("\nJourney Unit From SQL Native Failed\n    Error: ", err)
 			return
@@ -204,7 +222,7 @@ func TestJourneyUnitFromSQLNative(t *testing.T) {
 		return
 	}
 
-	if j.Title != "Journey" {
+	if j.Title != "test-title" {
 		t.Error("\nJourney Unit From SQL Native Failed\n    Error: wrong name")
 		return
 	}
@@ -217,29 +235,27 @@ func TestJourneyUnitFromSQLNative(t *testing.T) {
 	if !reflect.DeepEqual(journey.LanguageList, []*JourneyUnitLanguages{
 		{journey.ID,
 			Go.String(),
-			false,
+			true,
 		}, {
 			journey.ID,
 			Python.String(),
-			false,
+			true,
 		},
 		{
 			journey.ID,
 			JavaScript.String(),
-			false,
+			true,
 		},
 	}) {
 		t.Error("\nJourney Unit From SQL Native Failed\n    Error: wrong language list")
 		return
 	}
 
-	if j.Description != "this is a test description" {
+	if j.Description != "this a test description" {
 		t.Error("\nJourney Unit From SQL Native Failed\n    Error: wrong description")
 		return
 	}
 
-	fmt.Println("journey test wsconfig: ", journey)
-	fmt.Println("journey test wsconfig revision: ", j)
 	if j.WorkspaceConfig != 69420 {
 		t.Errorf("\nJourney Unit From SQL Native Failed\n    Error: wrong workspace config: %v", j.WorkspaceConfig)
 		return

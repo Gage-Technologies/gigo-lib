@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	ti "github.com/gage-technologies/gigo-lib/db"
@@ -35,24 +36,24 @@ type JourneyUnitAttempt struct {
 }
 
 type JourneyUnitAttemptSQL struct {
-	ID                      int64              `json:"_id" sql:"_id"`
-	UserID                  int64              `json:"user_id" sql:"user_id"`
-	ParentUnit              int64              `json:"parent_unit" sql:"parent_unit"`
-	Title                   string             `json:"title" sql:"title"`
-	UnitFocus               string             `json:"unit_focus" sql:"unit_focus"`
-	Description             string             `json:"description" sql:"description"`
-	RepoID                  int64              `json:"repo_id" sql:"repo_id"`
-	CreatedAt               time.Time          `json:"created_at" sql:"created_at"`
-	UpdatedAt               time.Time          `json:"updated_at" sql:"updated_at"`
-	ChallengeCost           *string            `json:"challenge_cost" sql:"challenge_cost"`
-	Completions             int64              `json:"completions" sql:"completions"`
-	Attempts                int64              `json:"attempts" sql:"attempts"`
-	Tier                    TierType           `json:"tier" sql:"tier"`
-	Embedded                bool               `json:"embedded" sql:"embedded"`
-	WorkspaceConfig         int64              `json:"workspace_config" sql:"workspace_config"`
-	WorkspaceConfigRevision int                `json:"workspace_config_revision" sql:"workspace_config_revision"`
-	WorkspaceSettings       *WorkspaceSettings `json:"workspace_settings" sql:"workspace_settings"`
-	EstimatedTutorialTime   *time.Duration     `json:"estimated_tutorial_time,omitempty" sql:"estimated_tutorial_time"`
+	ID                      int64          `json:"_id" sql:"_id"`
+	UserID                  int64          `json:"user_id" sql:"user_id"`
+	ParentUnit              int64          `json:"parent_unit" sql:"parent_unit"`
+	Title                   string         `json:"title" sql:"title"`
+	UnitFocus               string         `json:"unit_focus" sql:"unit_focus"`
+	Description             string         `json:"description" sql:"description"`
+	RepoID                  int64          `json:"repo_id" sql:"repo_id"`
+	CreatedAt               time.Time      `json:"created_at" sql:"created_at"`
+	UpdatedAt               time.Time      `json:"updated_at" sql:"updated_at"`
+	ChallengeCost           *string        `json:"challenge_cost" sql:"challenge_cost"`
+	Completions             int64          `json:"completions" sql:"completions"`
+	Attempts                int64          `json:"attempts" sql:"attempts"`
+	Tier                    TierType       `json:"tier" sql:"tier"`
+	Embedded                bool           `json:"embedded" sql:"embedded"`
+	WorkspaceConfig         int64          `json:"workspace_config" sql:"workspace_config"`
+	WorkspaceConfigRevision int            `json:"workspace_config_revision" sql:"workspace_config_revision"`
+	WorkspaceSettings       []byte         `json:"workspace_settings" sql:"workspace_settings"`
+	EstimatedTutorialTime   *time.Duration `json:"estimated_tutorial_time,omitempty" sql:"estimated_tutorial_time"`
 }
 
 type JourneyUnitAttemptFrontend struct {
@@ -65,7 +66,7 @@ type JourneyUnitAttemptFrontend struct {
 	EstimatedTutorialTime *time.Duration `json:"estimated_tutorial_time,omitempty" sql:"estimated_tutorial_time"`
 }
 
-func CreateJourneyAttemptUnit(id int64, userID int64, parentUnit int64, title string, unitFocus UnitFocus, languageList []ProgrammingLanguage, description string, repoID int64, createdAt time.Time, updatedAt time.Time, tags []string, tier TierType, workspaceSettings *WorkspaceSettings, workspaceConfig int64, workspaceConfigRevision int, estimatedTutorialTime *time.Duration) (*JourneyUnitAttempt, error) {
+func CreateJourneyUnitAttempt(id int64, userID int64, parentUnit int64, title string, unitFocus UnitFocus, languageList []ProgrammingLanguage, description string, repoID int64, createdAt time.Time, updatedAt time.Time, tags []string, tier TierType, workspaceSettings *WorkspaceSettings, workspaceConfig int64, workspaceConfigRevision int, estimatedTutorialTime *time.Duration) (*JourneyUnitAttempt, error) {
 	jTags := make([]*JourneyTags, 0)
 
 	for _, t := range tags {
@@ -155,6 +156,17 @@ func JourneyUnitAttemptFromSQLNative(db *ti.Database, rows *sql.Rows) (*JourneyU
 
 	}
 
+	// create workspace settings to unmarshall into
+	var workspaceSettings *WorkspaceSettings
+	if journeyUnitSQL.WorkspaceSettings != nil {
+		var ws WorkspaceSettings
+		err = json.Unmarshal(journeyUnitSQL.WorkspaceSettings, &ws)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshall workspace settings: %v", err)
+		}
+		workspaceSettings = &ws
+	}
+
 	return &JourneyUnitAttempt{
 		ID:                      journeyUnitSQL.ID,
 		UserID:                  journeyUnitSQL.UserID,
@@ -168,7 +180,7 @@ func JourneyUnitAttemptFromSQLNative(db *ti.Database, rows *sql.Rows) (*JourneyU
 		UpdatedAt:               journeyUnitSQL.UpdatedAt,
 		Tags:                    tags,
 		Tier:                    journeyUnitSQL.Tier,
-		WorkspaceSettings:       journeyUnitSQL.WorkspaceSettings,
+		WorkspaceSettings:       workspaceSettings,
 		WorkspaceConfig:         journeyUnitSQL.WorkspaceConfig,
 		EstimatedTutorialTime:   journeyUnitSQL.EstimatedTutorialTime,
 		Embedded:                journeyUnitSQL.Embedded,
@@ -202,8 +214,17 @@ func (i *JourneyUnitAttempt) ToFrontend() *JourneyUnitAttemptFrontend {
 	}
 }
 
-func (i *JourneyUnitAttempt) ToSQLNative() []*SQLInsertStatement {
+func (i *JourneyUnitAttempt) ToSQLNative() ([]*SQLInsertStatement, error) {
 	sqlStatements := make([]*SQLInsertStatement, 0)
+	var buf []byte
+	if i.WorkspaceSettings != nil {
+		b, err := json.Marshal(i.WorkspaceSettings)
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshall workspace settings: %v", err)
+		}
+		buf = b
+	}
+
 	for _, lang := range i.LanguageList {
 		s := lang.ToSQLNative()
 		sqlStatements = append(sqlStatements, s...)
@@ -217,8 +238,8 @@ func (i *JourneyUnitAttempt) ToSQLNative() []*SQLInsertStatement {
 		Statement: "insert ignore into journey_unit_attempts (_id, title, user_id, parent_unit, unit_focus, description, repo_id, created_at, updated_at, challenge_cost, completions, attempts, tier, embedded, workspace_config, workspace_config_revision, workspace_settings, estimated_tutorial_time) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);",
 		Values: []interface{}{i.ID, i.Title, i.UserID, i.ParentUnit, i.UnitFocus.String(), i.Description, i.RepoID, i.CreatedAt,
 			i.UpdatedAt, i.ChallengeCost, i.Completions, i.Attempts, i.Tier, i.Embedded, i.WorkspaceConfig,
-			i.WorkspaceConfigRevision, i.WorkspaceSettings, i.EstimatedTutorialTime},
+			i.WorkspaceConfigRevision, buf, i.EstimatedTutorialTime},
 	})
 
-	return sqlStatements
+	return sqlStatements, nil
 }

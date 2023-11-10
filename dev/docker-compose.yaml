@@ -18,10 +18,10 @@ services:
     restart: always
     networks:
       - gigo
-#    ports:
-#      - "4000:4000"
-#      - "10080:10080"
-#      - "2379:2379"
+  #    ports:
+  #      - "4000:4000"
+  #      - "10080:10080"
+  #      - "2379:2379"
 
   gigo-dev-git:
     image: gitea/gitea:latest
@@ -46,10 +46,10 @@ services:
     restart: always
     networks:
       - gigo
-#    ports:
-#      - "4222:4222"
-#      - "8222:8222"
-#      - "6222:6222"
+  #    ports:
+  #      - "4222:4222"
+  #      - "8222:8222"
+  #      - "6222:6222"
 
   gigo-dev-minio:
     image: quay.io/minio/minio:latest
@@ -76,9 +76,9 @@ services:
       - MEILI_MASTER_KEY=gigo-dev
     networks:
       - gigo
-#    ports:
-#      - "7700:7700"
-#      - "7701:7701"
+  #    ports:
+  #      - "7700:7700"
+  #      - "7701:7701"
 
   gigo-dev-redis:
     image: redis/redis-stack:latest
@@ -87,8 +87,8 @@ services:
       - REDIS_ARGS=--requirepass gigo-dev
     networks:
       - gigo
-#    ports:
-#      - "6379:6379"
+  #    ports:
+  #      - "6379:6379"
 
   gigo-dev-etcd:
     image: quay.io/coreos/etcd:v3.5.0
@@ -100,8 +100,8 @@ services:
     restart: always
     networks:
       - gigo
-#    ports:
-#      - "2379:2379"
+  #    ports:
+  #      - "2379:2379"
 
   gigo-dev-ziti-controller:
     image: "${ZITI_IMAGE}:${ZITI_VERSION}"

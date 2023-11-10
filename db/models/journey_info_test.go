@@ -6,7 +6,7 @@ import (
 )
 
 func TestCreateJourneyInfo(t *testing.T) {
-	journey, err := CreateJourneyInfo(1, 69420, "Hobby", "Python", "FullStackDevelopment", "Intermediate",
+	journey, err := CreateJourneyInfo(1, 69420, "Hobby", ProgrammingLanguageFromString("Python"), "FullStackDevelopment", "Intermediate",
 		"JetBrains", "Intermediate", "Tried", "Tried", "5")
 	if err != nil {
 		t.Error("\nCreate Journey Info Failed")
@@ -33,7 +33,7 @@ func TestCreateJourneyInfo(t *testing.T) {
 		return
 	}
 
-	if journey.SelectedLanguage != "Python" {
+	if journey.SelectedLanguage != Python {
 		t.Error("\nCreate Journey Info Failed\n    Error: wrong language")
 		return
 	}
@@ -78,7 +78,7 @@ func TestCreateJourneyInfo(t *testing.T) {
 }
 
 func TestJourneyInfo_ToSQLNative(t *testing.T) {
-	journey, err := CreateJourneyInfo(1, 69420, "Hobby", "Python", "FullStackDevelopment", "Intermediate",
+	journey, err := CreateJourneyInfo(1, 69420, "Hobby", ProgrammingLanguageFromString("Python"), "FullStackDevelopment", "Intermediate",
 		"JetBrains", "Intermediate", "Tried", "Tried", "5")
 	if err != nil {
 		t.Error("\nCreate Journey Info Failed")
@@ -107,7 +107,7 @@ func TestJourneyInfoFromSQLNative(t *testing.T) {
 
 	defer db.DB.Exec("delete from journey_info")
 
-	journey, err := CreateJourneyInfo(1, 69420, "Hobby", "Python", "FullStackDevelopment", "Intermediate",
+	journey, err := CreateJourneyInfo(1, 69420, "Hobby", ProgrammingLanguageFromString("Python"), "FullStackDevelopment", "Intermediate",
 		"JetBrains", "Intermediate", "Tried", "Tried", "5")
 	if err != nil {
 		t.Error("\nCreate Journey Info Failed")
@@ -165,7 +165,7 @@ func TestJourneyInfoFromSQLNative(t *testing.T) {
 		return
 	}
 
-	if j.SelectedLanguage != "Python" {
+	if j.SelectedLanguage != Python {
 		t.Error("\nJourney Info From SQL Native Failed\n    Error: wrong language")
 		return
 	}
