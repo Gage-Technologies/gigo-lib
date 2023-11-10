@@ -150,7 +150,7 @@ func ChatFromSQLNative(callerId int64, db *ti.Database, rows *sql.Rows) (*Chat, 
 		// query for the user's icon info
 		err = db.QueryRow(
 			ctx, &span, &callerName,
-			"select r.name as background, r.color_palette as background_palette, r.render_in_front as render_in_front, u.user_status = 1 as pro from users u left join rewards r on r._id = u.avatar_reward  where u._id = ?",
+			"select ifnull(r.name, '') as background, ifnull(r.color_palette, '') as background_palette, ifnull(r.render_in_front, false) as render_in_front, u.user_status = 1 as pro from users u left join rewards r on r._id = u.avatar_reward  where u._id = ?",
 			otherUser,
 		).Scan(
 			&chatIconInfo.Background,
