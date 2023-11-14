@@ -678,10 +678,12 @@ create table
     );
 
 create table
-    if not exists journey_unit (
+    if not exists journey_units (
          _id bigint not null primary key,
         title varchar(255) not null,
         unit_focus varchar(255) not null,
+        author_id bigint not null,
+        visibility int not null,
         description varchar(500) not null,
         repo_id bigint(20) not null,
         created_at datetime not null,

@@ -50,6 +50,8 @@ type JourneyUnit struct {
 	ID                      int64                   `json:"_id" sql:"_id"`
 	Title                   string                  `json:"title" sql:"title"`
 	UnitFocus               UnitFocus               `json:"unit_focus" sql:"unit_focus"`
+	AuthorID                int64                   `json:"author_id" sql:"author_id"`
+	Visibility              PostVisibility          `json:"visibility" sql:"visibility"`
 	LanguageList            []*JourneyUnitLanguages `json:"language_list" sql:"language_list"`
 	Description             string                  `json:"description" sql:"description"`
 	RepoID                  int64                   `json:"repo_id" sql:"repo_id"`
@@ -71,6 +73,8 @@ type JourneyUnitSQL struct {
 	ID                      int64          `json:"_id" sql:"_id"`
 	Title                   string         `json:"title" sql:"title"`
 	UnitFocus               string         `json:"unit_focus" sql:"unit_focus"`
+	AuthorID                int64          `json:"author_id" sql:"author_id"`
+	Visibility              int            `json:"visibility" sql:"visibility"`
 	Description             string         `json:"description" sql:"description"`
 	RepoID                  int64          `json:"repo_id" sql:"repo_id"`
 	CreatedAt               time.Time      `json:"created_at" sql:"created_at"`
@@ -90,13 +94,14 @@ type JourneyUnitFrontend struct {
 	ID                    string   `json:"_id" sql:"_id"`
 	Title                 string   `json:"title" sql:"title"`
 	UnitFocus             string   `json:"unit_focus" sql:"unit_focus"`
+	Visibility            int      `json:"visibility" sql:"visibility"`
 	LanguageList          []string `json:"language_list" sql:"language_list"`
 	Description           string   `json:"description" sql:"description"`
 	Tags                  []string `json:"tags" sql:"tags"`
 	EstimatedTutorialTime *int64   `json:"estimated_tutorial_time,omitempty" sql:"estimated_tutorial_time"`
 }
 
-func CreateJourneyUnit(id int64, title string, unitFocus UnitFocus, languageList []ProgrammingLanguage, description string, repoID int64, createdAt time.Time, updatedAt time.Time, tags []string, tier TierType, workspaceSettings *WorkspaceSettings, workspaceConfig int64, estimatedTutorialTime *time.Duration) (*JourneyUnit, error) {
+func CreateJourneyUnit(id int64, title string, unitFocus UnitFocus, authorID int64, visibility PostVisibility, languageList []ProgrammingLanguage, description string, repoID int64, createdAt time.Time, updatedAt time.Time, tags []string, tier TierType, workspaceSettings *WorkspaceSettings, workspaceConfig int64, estimatedTutorialTime *time.Duration) (*JourneyUnit, error) {
 	jTags := make([]*JourneyTags, 0)
 
 	for _, t := range tags {
@@ -113,6 +118,8 @@ func CreateJourneyUnit(id int64, title string, unitFocus UnitFocus, languageList
 		ID:                    id,
 		Title:                 title,
 		UnitFocus:             unitFocus,
+		AuthorID:              authorID,
+		Visibility:            visibility,
 		LanguageList:          jLanguages,
 		Description:           description,
 		RepoID:                repoID,
@@ -202,6 +209,8 @@ func JourneyUnitFromSQLNative(db *ti.Database, rows *sql.Rows) (*JourneyUnit, er
 		ID:                      journeyUnitSQL.ID,
 		Title:                   journeyUnitSQL.Title,
 		UnitFocus:               UnitFocusFromString(journeyUnitSQL.UnitFocus),
+		AuthorID:                journeyUnitSQL.AuthorID,
+		Visibility:              PostVisibility(journeyUnitSQL.Visibility),
 		LanguageList:            languages,
 		Description:             journeyUnitSQL.Description,
 		RepoID:                  journeyUnitSQL.RepoID,
@@ -243,6 +252,7 @@ func (i *JourneyUnit) ToFrontend() *JourneyUnitFrontend {
 		ID:                    fmt.Sprintf("%d", i.ID),
 		Title:                 i.Title,
 		UnitFocus:             i.UnitFocus.String(),
+		Visibility:            int(i.Visibility),
 		LanguageList:          languages,
 		Description:           i.Description,
 		Tags:                  tags,
@@ -271,8 +281,8 @@ func (i *JourneyUnit) ToSQLNative() ([]*SQLInsertStatement, error) {
 	}
 
 	sqlStatements = append(sqlStatements, &SQLInsertStatement{
-		Statement: "insert ignore into journey_units (_id, title, unit_focus, description, repo_id, created_at, updated_at, challenge_cost, completions, attempts, tier, embedded, workspace_config, workspace_config_revision, workspace_settings, estimated_tutorial_time) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);",
-		Values: []interface{}{i.ID, i.Title, i.UnitFocus.String(), i.Description, i.RepoID, i.CreatedAt,
+		Statement: "insert ignore into journey_units (_id, title, unit_focus, author_id, visibility, description, repo_id, created_at, updated_at, challenge_cost, completions, attempts, tier, embedded, workspace_config, workspace_config_revision, workspace_settings, estimated_tutorial_time) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);",
+		Values: []interface{}{i.ID, i.Title, i.UnitFocus.String(), i.AuthorID, i.Visibility, i.Description, i.RepoID, i.CreatedAt,
 			i.UpdatedAt, i.ChallengeCost, i.Completions, i.Attempts, i.Tier, i.Embedded, i.WorkspaceConfig,
 			i.WorkspaceConfigRevision, buf, i.EstimatedTutorialTime},
 	})
