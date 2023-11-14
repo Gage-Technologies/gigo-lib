@@ -14,8 +14,12 @@ func init() {
 }
 
 type WorkspaceResourceUtil struct {
-	CPU    float64 `json:"cpu"`
-	Memory float64 `json:"memory"`
+	CPU         float64 `json:"cpu"`
+	Memory      float64 `json:"memory"`
+	CPULimit    int64   `json:"cpu_limit"`
+	MemoryLimit int64   `json:"memory_limit"`
+	CPUUsage    int64   `json:"cpu_usage"`
+	MemoryUsage int64   `json:"memory_usage"`
 }
 
 type WorkspaceStatusUpdateMsg struct {
