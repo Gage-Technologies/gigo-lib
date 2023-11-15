@@ -16,6 +16,7 @@ import (
 
 type Attempt struct {
 	ID          int64     `json:"_id" sql:"_id"`
+	Title       *string   `json:"title" sql:"title"`
 	PostTitle   string    `json:"post_title" sql:"post_title"`
 	Description string    `json:"description" sql:"description"`
 	Author      string    `json:"author" sql:"author"`
@@ -39,6 +40,7 @@ type Attempt struct {
 
 type AttemptSQL struct {
 	ID          int64     `json:"_id" sql:"_id"`
+	Title       *string   `json:"title" sql:"title"`
 	PostTitle   string    `json:"post_title" sql:"post_title"`
 	Description string    `json:"description" sql:"description"`
 	Author      string    `json:"author" sql:"author"`
@@ -62,6 +64,7 @@ type AttemptSQL struct {
 
 type AttemptFrontend struct {
 	ID          string    `json:"_id" sql:"_id"`
+	Title       *string   `json:"title" sql:"title"`
 	PostTitle   string    `json:"post_title" sql:"post_title"`
 	Description string    `json:"description" sql:"description"`
 	Author      string    `json:"author" sql:"author"`
@@ -172,6 +175,7 @@ func AttemptFromSQLNative(db *ti.Database, rows *sql.Rows) (*Attempt, error) {
 		WorkspaceSettings: workspaceSettings,
 		PostType:          attemptSQL.PostType,
 		StartTime:         attemptSQL.StartTime,
+		Title:             attemptSQL.Title,
 	}
 
 	return attempt, nil
@@ -198,6 +202,11 @@ func (i *Attempt) ToFrontend() *AttemptFrontend {
 		startTime = &t
 	}
 
+	var title *string
+	if i.Title != nil {
+		title = i.Title
+	}
+
 	// create new attempt frontend
 	mf := &AttemptFrontend{
 		ID:          fmt.Sprintf("%d", i.ID),
@@ -221,6 +230,7 @@ func (i *Attempt) ToFrontend() *AttemptFrontend {
 		PostType:        i.PostType,
 		PostTypeString:  i.PostType.String(),
 		StartTimeMillis: startTime,
+		Title:           title,
 	}
 
 	return mf
