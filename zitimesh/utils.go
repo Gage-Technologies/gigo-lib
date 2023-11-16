@@ -14,8 +14,6 @@ func EnrollIdentity(token string) (*ziti.Config, error) {
 		return nil, fmt.Errorf("failed to parse token: %w", err)
 	}
 
-	fmt.Println("tkn: ", tkn)
-
 	// enroll the identity into a configuration
 	conf, err := enroll.Enroll(enroll.EnrollmentFlags{
 		Token:  tkn,

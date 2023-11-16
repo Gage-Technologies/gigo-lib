@@ -46,20 +46,21 @@ func TestAgent(t *testing.T) {
 	err = manager.CreateWorkspaceServicePolicy()
 	assert.NoError(t, err)
 
-	// defer manager.DeleteServer(169)
+	defer manager.DeleteServer(169)
 	serverId, serverToken, err := manager.CreateServer(169)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, serverToken)
 	assert.NotEmpty(t, serverId)
 
-	// defer manager.DeleteAgent(1420)
+	defer manager.DeleteAgent(1420)
 	agentId, agentToken, err := manager.CreateAgent(1420)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, agentToken)
 	assert.NotEmpty(t, agentId)
 
-	fmt.Println("agentId: ", agentId)
-	fmt.Println("agentToken: ", agentToken)
+	if agentId == "" || agentToken == "" || serverId == "" || serverToken == "" {
+		return
+	}
 
 	// create a new agent instance
 	logger, _ := logging.CreateBasicLogger(logging.DefaultBasicLoggerOptions)

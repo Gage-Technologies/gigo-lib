@@ -3,7 +3,6 @@ package zitimesh
 import (
 	"context"
 	"crypto/x509"
-	"encoding/json"
 	"fmt"
 	"time"
 
@@ -130,7 +129,6 @@ func (m *Manager) CreateAgent(id int) (string, string, error) {
 
 	// set the identity id
 	identityId = createIdentityRes.Payload.Data.ID
-	fmt.Println("identityId created: ", identityId)
 
 	// retrieve the token for the identity
 	params := &identity.DetailIdentityParams{
@@ -142,8 +140,6 @@ func (m *Manager) CreateAgent(id int) (string, string, error) {
 	if err != nil {
 		return "", "", fmt.Errorf("failed to retrieve identity: %w", err)
 	}
-	b, _ := json.Marshal(resp)
-	fmt.Println("resp: ", string(b))
 	return identityId, resp.Payload.Data.Enrollment.Ott.JWT, nil
 }
 
@@ -233,7 +229,6 @@ func (m *Manager) CreateServer(id int64) (string, string, error) {
 
 	// set the identity id
 	identityId = createIdentityRes.Payload.Data.ID
-	fmt.Println("identityId created: ", identityId)
 
 	// retrieve the token for the identity
 	params := &identity.DetailIdentityParams{
@@ -245,8 +240,6 @@ func (m *Manager) CreateServer(id int64) (string, string, error) {
 	if err != nil {
 		return "", "", fmt.Errorf("failed to retrieve identity: %w", err)
 	}
-	b, _ := json.Marshal(resp)
-	fmt.Println("resp: ", string(b))
 	return identityId, resp.Payload.Data.Enrollment.Ott.JWT, nil
 }
 
