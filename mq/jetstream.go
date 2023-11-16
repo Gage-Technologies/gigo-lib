@@ -188,6 +188,17 @@ func (c *JetstreamClient) init() error {
 		return fmt.Errorf("could not initialize chat stream: %v", err)
 	}
 
+	// initialize email stream
+	err = c.initStream(
+		streams.StreamEmail,
+		streams.StreamSubjectsEmail,
+		streams.RetentionPolicyEmail,
+		streams.DuplicateFilterWindowEmail,
+	)
+	if err != nil {
+		return fmt.Errorf("could not initialize email stream: %v", err)
+	}
+
 	return nil
 }
 
