@@ -54,9 +54,11 @@ type WorkspaceAgent struct {
 	Version           string              `json:"version" sql:"version"`
 	OwnerID           int64               `json:"owner_id" sql:"owner_id"`
 	Secret            uuid.UUID           `json:"secret" sql:"secret"`
+	ZitiID            string              `json:"ziti_id" sql:"ziti_id"`
+	ZitiToken         string              `json:"ziti_token" sql:"ziti_token"`
 }
 
-func CreateWorkspaceAgent(id int64, workspace int64, version string, ownerID int64, secret uuid.UUID) *WorkspaceAgent {
+func CreateWorkspaceAgent(id int64, workspace int64, version string, ownerID int64, secret uuid.UUID, zitiID string, zitiToken string) *WorkspaceAgent {
 	return &WorkspaceAgent{
 		ID:          id,
 		CreatedAt:   time.Now(),
@@ -66,6 +68,8 @@ func CreateWorkspaceAgent(id int64, workspace int64, version string, ownerID int
 		Version:     version,
 		OwnerID:     ownerID,
 		Secret:      secret,
+		ZitiID:      zitiID,
+		ZitiToken:   zitiToken,
 	}
 }
 
@@ -82,9 +86,9 @@ func (a *WorkspaceAgent) ToSQLNative() []*SQLInsertStatement {
 	// create slice to hold insertion statements for this workspace config and initialize the slice with the main insertion statement
 	return []*SQLInsertStatement{
 		{
-			Statement: "insert ignore into workspace_agent(_id, created_at, updated_at, first_connect, last_connect, last_disconnect, last_connected_node, disconnect_count, state, workspace_id, version, owner_id, secret) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, uuid_to_bin(?));",
+			Statement: "insert ignore into workspace_agent(_id, created_at, updated_at, first_connect, last_connect, last_disconnect, last_connected_node, disconnect_count, state, workspace_id, version, owner_id, secret, ziti_id, ziti_token) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, uuid_to_bin(?), ?, ?);",
 			Values: []interface{}{
-				a.ID, a.CreatedAt, a.UpdatedAt, a.FirstConnect, a.LastConnect, a.LastDisconnect, a.LastConnectedNode, a.DisconnectCount, a.State, a.WorkspaceID, a.Version, a.OwnerID, a.Secret,
+				a.ID, a.CreatedAt, a.UpdatedAt, a.FirstConnect, a.LastConnect, a.LastDisconnect, a.LastConnectedNode, a.DisconnectCount, a.State, a.WorkspaceID, a.Version, a.OwnerID, a.Secret, a.ZitiID, a.ZitiToken,
 			},
 		},
 	}
