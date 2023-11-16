@@ -2,12 +2,13 @@ package agentsdk
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/bwmarrin/snowflake"
 	"github.com/gage-technologies/gigo-lib/db/models"
 	"github.com/gage-technologies/gigo-lib/logging"
 	"github.com/gage-technologies/gigo-lib/workspace_config"
 	"tailscale.com/tailcfg"
-	"time"
 )
 
 type PostWorkspaceAgentVersionRequest struct {
@@ -100,6 +101,8 @@ type WorkspaceAgentMetadata struct {
 	ChallengeType      models.ChallengeType                      `json:"challenge_type"`
 	UserHolidayTheme   bool                                      `json:"user_holiday_theme"`
 	Hosts              map[string]string                         `json:"hosts"`
+	ZitiID             string                                    `json:"ziti_id"`
+	ZitiToken          string                                    `json:"ziti_token"`
 }
 
 type Holiday int
