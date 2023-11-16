@@ -649,15 +649,22 @@ create table
 
 create table
     if not exists web_tracking (
-    `_id` bigint not null primary key,
-    `user_id` bigint default NULL,
-    `ip` bigint not null,
-    `host` varchar(255) not null,
-    `event` varchar(255) not null,
-    `timestamp` datetime not null,
-    `timespent` bigint default NULL,
-    `path` varchar(255) not null,
-    `lattitude` double,
-    `longitude` double,
-    `metadata` json
-)
+        `_id` bigint not null primary key,
+        `user_id` bigint default NULL,
+        `ip` bigint not null,
+        `host` varchar(255) not null,
+        `event` varchar(255) not null,
+        `timestamp` datetime not null,
+        `timespent` bigint default NULL,
+        `path` varchar(255) not null,
+        `lattitude` double,
+        `longitude` double,
+        `metadata` json
+    );
+create table
+    if not exists user_inactivity (
+          user_id bigint not null primary key,
+          last_login datetime not null,
+          last_notified datetime not null,
+          should_notify boolean not null
+    );
