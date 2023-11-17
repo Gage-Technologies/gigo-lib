@@ -16,6 +16,7 @@ func TestCreateWorkspaceConfig(t *testing.T) {
 		42069,
 		[]int64{69420},
 		[]ProgrammingLanguage{Go},
+		int(0),
 	)
 
 	if wc.ID != 69 {
@@ -72,6 +73,7 @@ func TestWorkspaceConfigFromSQLNative(t *testing.T) {
 		42069,
 		[]int64{69420},
 		[]ProgrammingLanguage{Go},
+		int(0),
 	)
 
 	statements, err := wc.ToSQLNative()

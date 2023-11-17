@@ -19,6 +19,8 @@ type WorkspaceConfig struct {
 	Official    bool                  `json:"official" sql:"official"`
 	Tags        []int64               `json:"tags" sql:"tags"`
 	Languages   []ProgrammingLanguage `json:"languages" sql:"languages"`
+	Uses        int                   `json:"uses" sql:"uses"`
+	Completions int                   `json:"completions" sql:"completions"`
 }
 
 type WorkspaceConfigSQL struct {
@@ -29,6 +31,8 @@ type WorkspaceConfigSQL struct {
 	AuthorID    int64  `json:"author_id" sql:"author_id"`
 	Revision    int    `json:"revision" sql:"revision"`
 	Official    bool   `json:"official" sql:"official"`
+	Uses        int    `json:"uses" sql:"uses"`
+	Completions int    `json:"completions" sql:"completions"`
 }
 
 type WorkspaceConfigFrontend struct {
@@ -43,10 +47,12 @@ type WorkspaceConfigFrontend struct {
 	Tags            []string              `json:"tags"`
 	Languages       []ProgrammingLanguage `json:"languages"`
 	LanguageStrings []string              `json:"languages_strings"`
+	Uses            int                   `json:"uses" sql:"uses"`
+	Completions     int                   `json:"completions" sql:"completions"`
 }
 
 func CreateWorkspaceConfig(_id int64, title string, description string, content string, authorID int64, revision int,
-	tags []int64, languages []ProgrammingLanguage) *WorkspaceConfig {
+	tags []int64, languages []ProgrammingLanguage, uses int) *WorkspaceConfig {
 	return &WorkspaceConfig{
 		ID:          _id,
 		Title:       title,
@@ -57,6 +63,8 @@ func CreateWorkspaceConfig(_id int64, title string, description string, content 
 		Official:    false,
 		Tags:        tags,
 		Languages:   languages,
+		Uses:        uses,
+		Completions: 0,
 	}
 }
 
@@ -127,6 +135,8 @@ func WorkspaceConfigFromSQLNative(db *ti.Database, rows *sql.Rows) (*WorkspaceCo
 		Official:    configSQL.Official,
 		Tags:        tags,
 		Languages:   languages,
+		Uses:        configSQL.Uses,
+		Completions: configSQL.Completions,
 	}, nil
 }
 
@@ -158,6 +168,8 @@ func (c *WorkspaceConfig) ToFrontend() *WorkspaceConfigFrontend {
 		Tags:            tags,
 		Languages:       c.Languages,
 		LanguageStrings: langStrings,
+		Uses:            c.Uses,
+		Completions:     c.Completions,
 	}
 }
 
@@ -165,7 +177,7 @@ func (c *WorkspaceConfig) ToSQLNative() ([]*SQLInsertStatement, error) {
 	// create slice to hold insertion statements for this workspace config and initialize the slice with the main insertion statement
 	sqlStatements := []*SQLInsertStatement{
 		{
-			Statement: "insert ignore into workspace_config(_id, title, description, content, author_id, revision, official) values(?, ?, ?, ?, ?, ?, ?);",
+			Statement: "insert ignore into workspace_config(_id, title, description, content, author_id, revision, official, uses, completions) values(?, ?, ?, ?, ?, ?, ?, ?, ?);",
 			Values: []interface{}{
 				c.ID,
 				c.Title,
@@ -174,6 +186,8 @@ func (c *WorkspaceConfig) ToSQLNative() ([]*SQLInsertStatement, error) {
 				c.AuthorID,
 				c.Revision,
 				c.Official,
+				c.Uses,
+				c.Completions,
 			},
 		},
 	}
