@@ -83,7 +83,7 @@ func NewManager(cfg config.ZitiConfig) (*Manager, error) {
 // CreateAgent
 //
 // Creates an agent in the ziti mesh
-func (m *Manager) CreateAgent(id int) (string, string, error) {
+func (m *Manager) CreateAgent(id int64) (string, string, error) {
 	// create our variables for the identity of the agent
 	isAdmin := false
 	name := fmt.Sprintf("gigo-ws-agent-%d", id)
@@ -146,7 +146,7 @@ func (m *Manager) CreateAgent(id int) (string, string, error) {
 // DeleteAgent
 //
 // Deletes an agent from the ziti mesh
-func (m *Manager) DeleteAgent(id int) error {
+func (m *Manager) DeleteAgent(id int64) error {
 	// create our variables for the identity of the agent
 	name := fmt.Sprintf("gigo-ws-agent-%d", id)
 
