@@ -10,25 +10,25 @@ type UserInactivity struct {
 	UserId       int64     `json:"user_id" sql:"user_id"`
 	LastLogin    time.Time `json:"last_login" sql:"last_login"`
 	LastNotified time.Time `json:"last_notified" sql:"last_notified"`
-	ShouldNotify bool      `json:"should_notify" sql:"should_notify"`
-	WeekSent     bool      `json:"week_sent" sql:"week_sent"`
+	SendWeek     bool      `json:"send_week" sql:"send_week"`
+	SendMonth    bool      `json:"send_month" sql:"send_month"`
 }
 
 type UserInactivitySQL struct {
 	UserId       int64     `json:"user_id" sql:"user_id"`
 	LastLogin    time.Time `json:"last_login" sql:"last_login"`
 	LastNotified time.Time `json:"last_notified" sql:"last_notified"`
-	ShouldNotify bool      `json:"should_notify" sql:"should_notify"`
-	WeekSent     bool      `json:"week_sent" sql:"week_sent"`
+	SendWeek     bool      `json:"send_week" sql:"send_week"`
+	SendMonth    bool      `json:"send_month" sql:"send_month"`
 }
 
-func CreateUserInactivity(userId int64, lastLogin time.Time, lastNotified time.Time, shouldNotify bool, weekSent bool) (*UserInactivity, error) {
+func CreateUserInactivity(userId int64, lastLogin time.Time, lastNotified time.Time, sendWeek bool, sendMonth bool) (*UserInactivity, error) {
 	return &UserInactivity{
 		UserId:       userId,
 		LastLogin:    lastLogin,
 		LastNotified: lastNotified,
-		ShouldNotify: shouldNotify,
-		WeekSent:     weekSent,
+		SendWeek:     sendWeek,
+		SendMonth:    sendMonth,
 	}, nil
 }
 
@@ -36,8 +36,8 @@ func (i *UserInactivity) ToSQLNative() []*SQLInsertStatement {
 	sqlStatements := make([]*SQLInsertStatement, 0)
 
 	sqlStatements = append(sqlStatements, &SQLInsertStatement{
-		Statement: "insert ignore into user_inactivity(user_id, last_login, last_notified, should_notify, week_sent) values(?, ?, ?, ?, ?);",
-		Values:    []interface{}{i.UserId, i.LastLogin, i.LastNotified, i.ShouldNotify, i.WeekSent},
+		Statement: "insert ignore into user_inactivity(user_id, last_login, last_notified, send_week, send_month) values(?, ?, ?, ?, ?);",
+		Values:    []interface{}{i.UserId, i.LastLogin, i.LastNotified, i.SendWeek, i.SendMonth},
 	})
 
 	return sqlStatements
@@ -58,8 +58,8 @@ func UserInactivityFromSQLNative(rows *sql.Rows) (*UserInactivity, error) {
 		UserId:       inactivitySQL.UserId,
 		LastLogin:    inactivitySQL.LastLogin,
 		LastNotified: inactivitySQL.LastNotified,
-		ShouldNotify: inactivitySQL.ShouldNotify,
-		WeekSent:     inactivitySQL.WeekSent,
+		SendWeek:     inactivitySQL.SendWeek,
+		SendMonth:    inactivitySQL.SendMonth,
 	}
 
 	return inactive, nil

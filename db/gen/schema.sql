@@ -666,6 +666,6 @@ create table
           user_id bigint not null primary key,
           last_login datetime not null,
           last_notified datetime not null,
-          should_notify boolean not null,
-          week_sent boolean not null
+          send_week boolean not null,
+          send_month boolean not null
     );
