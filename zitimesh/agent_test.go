@@ -3,6 +3,8 @@ package zitimesh
 import (
 	"bytes"
 	"context"
+	"encoding/json"
+	"fmt"
 	"io"
 	"net"
 	"net/http"
@@ -73,7 +75,7 @@ func TestAgent(t *testing.T) {
 	}
 	defer logWriter.Close()
 	logger := slog.Make(sloghuman.Sink(os.Stdout), sloghuman.Sink(logWriter)).Leveled(slog.LevelDebug)
-	_, err = NewAgent(context.TODO(), agentId, agentToken, logger)
+	agent, err := NewAgent(context.TODO(), agentId, agentToken, logger)
 	assert.NoError(t, err)
 
 	// Test creating a workspace service
@@ -115,4 +117,17 @@ func TestAgent(t *testing.T) {
 	_, err = io.Copy(buf, resp.Body)
 	assert.NoError(t, err)
 	assert.Equal(t, "hello ziti", buf.String())
+
+	// retrieve the network stats
+	stats := agent.GetNetworkStats()
+	b, _ := json.Marshal(stats)
+	fmt.Printf("%s\n", string(b))
+
+	// clear the stats
+	agent.ClearStats()
+
+	// retrieve the network stats
+	stats = agent.GetNetworkStats()
+	b, _ = json.Marshal(stats)
+	fmt.Printf("%s\n", string(b))
 }

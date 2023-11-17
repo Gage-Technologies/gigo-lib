@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net"
 	"sync"
 	"time"
@@ -65,6 +64,12 @@ type Agent struct {
 	// wg is the wait group used to wait for the agent to close
 	wg *conc.WaitGroup
 
+	// stats are the statistics collected by the agent based on the network usage
+	stats *GlobalStats
+
+	// statsMu is the mutex used to protect the stats field
+	statsMu *sync.Mutex
+
 	// logger is the logger used by the agent
 	logger slog.Logger
 }
@@ -98,7 +103,13 @@ func NewAgent(ctx context.Context, name string, token string, logger slog.Logger
 		forwardCtxs: make(map[string]*ForwardContext),
 		mu:          &sync.Mutex{},
 		wg:          conc.NewWaitGroup(),
-		logger:      logger,
+		statsMu:     &sync.Mutex{},
+		stats: &GlobalStats{
+			Total:     &NetworkStats{},
+			ByPort:    make(map[int]*PortStats),
+			ByNetwork: make(map[NetworkType]*NetworkStats),
+		},
+		logger: logger,
 	}
 
 	zitiCtx.Events().AddServiceAddedListener(func(_ ziti.Context, event *rest_model.ServiceDetail) {
@@ -123,6 +134,20 @@ func (a *Agent) Close() {
 
 	// wait for the agent to close
 	a.wg.Wait()
+}
+
+func (a *Agent) GetNetworkStats() GlobalStats {
+	return *a.stats
+}
+
+func (a *Agent) ClearStats() {
+	a.statsMu.Lock()
+	defer a.statsMu.Unlock()
+	a.stats = &GlobalStats{
+		Total:     &NetworkStats{},
+		ByPort:    make(map[int]*PortStats),
+		ByNetwork: make(map[NetworkType]*NetworkStats),
+	}
 }
 
 func (a *Agent) serviceWatcher() {
@@ -243,12 +268,12 @@ func (a *Agent) handleConnection(zitiConn edge.Conn, fctx ForwardContext) {
 
 	// copy input from the zitinet to the local port
 	a.wg.Go(func() {
-		io.Copy(localConn, zitiConn)
+		copyWithStats(localConn, zitiConn, true, localConfig.Network, localConfig.Port, a.statsMu, a.stats)
 	})
 
 	// copy input from the local port to the zitinet
 	a.wg.Go(func() {
-		io.Copy(zitiConn, localConn)
+		copyWithStats(zitiConn, localConn, false, localConfig.Network, localConfig.Port, a.statsMu, a.stats)
 	})
 
 	// wait for the context to be cancelled
