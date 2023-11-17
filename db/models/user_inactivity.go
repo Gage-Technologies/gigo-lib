@@ -12,6 +12,7 @@ type UserInactivity struct {
 	LastNotified time.Time `json:"last_notified" sql:"last_notified"`
 	SendWeek     bool      `json:"send_week" sql:"send_week"`
 	SendMonth    bool      `json:"send_month" sql:"send_month"`
+	NotifyOn     time.Time `json:"notify_on" sql:"notify_on"`
 }
 
 type UserInactivitySQL struct {
@@ -20,15 +21,18 @@ type UserInactivitySQL struct {
 	LastNotified time.Time `json:"last_notified" sql:"last_notified"`
 	SendWeek     bool      `json:"send_week" sql:"send_week"`
 	SendMonth    bool      `json:"send_month" sql:"send_month"`
+	NotifyOn     time.Time `json:"notify_on" sql:"notify_on"`
 }
 
-func CreateUserInactivity(userId int64, lastLogin time.Time, lastNotified time.Time, sendWeek bool, sendMonth bool) (*UserInactivity, error) {
+func CreateUserInactivity(userId int64, lastLogin time.Time, lastNotified time.Time, sendWeek bool, sendMonth bool,
+	notifyOn time.Time) (*UserInactivity, error) {
 	return &UserInactivity{
 		UserId:       userId,
 		LastLogin:    lastLogin,
 		LastNotified: lastNotified,
 		SendWeek:     sendWeek,
 		SendMonth:    sendMonth,
+		NotifyOn:     notifyOn,
 	}, nil
 }
 
@@ -36,8 +40,8 @@ func (i *UserInactivity) ToSQLNative() []*SQLInsertStatement {
 	sqlStatements := make([]*SQLInsertStatement, 0)
 
 	sqlStatements = append(sqlStatements, &SQLInsertStatement{
-		Statement: "insert ignore into user_inactivity(user_id, last_login, last_notified, send_week, send_month) values(?, ?, ?, ?, ?);",
-		Values:    []interface{}{i.UserId, i.LastLogin, i.LastNotified, i.SendWeek, i.SendMonth},
+		Statement: "insert ignore into user_inactivity(user_id, last_login, last_notified, send_week, send_month, notify_on) values(?, ?, ?, ?, ?, ?);",
+		Values:    []interface{}{i.UserId, i.LastLogin, i.LastNotified, i.SendWeek, i.SendMonth, i.NotifyOn},
 	})
 
 	return sqlStatements
@@ -60,6 +64,7 @@ func UserInactivityFromSQLNative(rows *sql.Rows) (*UserInactivity, error) {
 		LastNotified: inactivitySQL.LastNotified,
 		SendWeek:     inactivitySQL.SendWeek,
 		SendMonth:    inactivitySQL.SendMonth,
+		NotifyOn:     inactivitySQL.NotifyOn,
 	}
 
 	return inactive, nil

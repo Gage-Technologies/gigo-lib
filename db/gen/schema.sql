@@ -667,5 +667,6 @@ create table
           last_login datetime not null,
           last_notified datetime not null,
           send_week boolean not null,
-          send_month boolean not null
+          send_month boolean not null,
+          notify_on datetime not null
     );

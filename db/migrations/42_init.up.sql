@@ -1,0 +1,1 @@
+ALTER TABLE user_inactivity ADD COLUMN notify_on datetime NOT NULL;
