@@ -4,13 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/gage-technologies/gigo-lib/logging"
-	"github.com/openziti/sdk-golang/ziti/edge"
-	"github.com/sourcegraph/conc"
 	"io"
 	"net"
 	"sync"
 	"time"
+
+	"cdr.dev/slog"
+	"github.com/openziti/sdk-golang/ziti/edge"
+	"github.com/sourcegraph/conc"
 
 	"github.com/openziti/edge-api/rest_model"
 	"github.com/openziti/sdk-golang/ziti"
@@ -65,13 +66,13 @@ type Agent struct {
 	wg *conc.WaitGroup
 
 	// logger is the logger used by the agent
-	logger logging.Logger
+	logger slog.Logger
 }
 
 // NewAgent
 //
 // Create a new Ziti agent.
-func NewAgent(ctx context.Context, name string, token string, logger logging.Logger) (*Agent, error) {
+func NewAgent(ctx context.Context, name string, token string, logger slog.Logger) (*Agent, error) {
 	// enroll the identity into a configuration
 	zitiConfig, err := EnrollIdentity(token)
 	if err != nil {
@@ -130,7 +131,7 @@ func (a *Agent) serviceWatcher() {
 		// refresh the nodes services
 		err := a.zitiCtx.RefreshServices()
 		if err != nil {
-			a.logger.Warnf("(ziti-agent: %s) failed to refresh ziti services: %v", a.Name, err)
+			a.logger.Warn(a.ctx, "failed to refresh ziti services", slog.F("agent_name", a.Name), slog.Error(err))
 			continue
 		}
 
@@ -187,7 +188,7 @@ func (a *Agent) startPortListener(fctx ForwardContext) {
 		MaxConnections: 64,
 	})
 	if err != nil {
-		a.logger.Warnf("(ziti-agent: %s) failed to listen on service %s: %v", a.Name, fctx.Service, err)
+		a.logger.Warn(fctx.Ctx, "failed to listen on service", slog.F("agent_name", a.Name), slog.F("service", fctx.Service), slog.Error(err))
 		return
 	}
 	defer listener.Close()
@@ -202,7 +203,7 @@ func (a *Agent) startPortListener(fctx ForwardContext) {
 				if listener.IsClosed() {
 					return
 				}
-				a.logger.Warnf("(ziti-agent: %s) failed to accept connection: %v", a.Name, err)
+				a.logger.Warn(a.ctx, "failed to accept connection", slog.F("agent_name", a.Name), slog.Error(err))
 				continue
 			}
 
@@ -222,20 +223,20 @@ func (a *Agent) handleConnection(zitiConn edge.Conn, fctx ForwardContext) {
 	// load the local config from the connection
 	buf := zitiConn.GetAppData()
 	if len(buf) == 0 {
-		a.logger.Warnf("(ziti-agent: %s) failed to read local config from connection", a.Name)
+		a.logger.Warn(a.ctx, "failed to read local config from connection", slog.F("agent_name", a.Name))
 		return
 	}
 	var localConfig AgentService
 	err := json.Unmarshal(buf, &localConfig)
 	if err != nil {
-		a.logger.Warnf("(ziti-agent: %s) failed to unmarshal local config: %v", a.Name, err)
+		a.logger.Warn(a.ctx, "failed to unmarshal local config", slog.F("agent_name", a.Name), slog.Error(err))
 		return
 	}
 
 	// dial the localport
 	localConn, err := net.Dial(string(localConfig.Network), fmt.Sprintf("localhost:%d", localConfig.Port))
 	if err != nil {
-		a.logger.Warnf("(ziti-agent: %s) failed to dial local port: %v", a.Name, err)
+		a.logger.Warn(a.ctx, "failed to dial local port", slog.F("agent_name", a.Name), slog.Error(err))
 		return
 	}
 	defer localConn.Close()

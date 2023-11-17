@@ -4,14 +4,19 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/gage-technologies/gigo-lib/config"
-	"github.com/gage-technologies/gigo-lib/logging"
-	"github.com/openziti/sdk-golang/ziti"
-	"github.com/stretchr/testify/assert"
 	"io"
 	"net"
 	"net/http"
+	"os"
+	"path/filepath"
 	"testing"
+
+	"cdr.dev/slog"
+	"cdr.dev/slog/sloggers/sloghuman"
+	"github.com/gage-technologies/gigo-lib/config"
+	"github.com/openziti/sdk-golang/ziti"
+	"github.com/stretchr/testify/assert"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 func testLaunchLocalDevServer() {
@@ -63,7 +68,12 @@ func TestAgent(t *testing.T) {
 	}
 
 	// create a new agent instance
-	logger, _ := logging.CreateBasicLogger(logging.DefaultBasicLoggerOptions)
+	logWriter := &lumberjack.Logger{
+		Filename: filepath.Join(os.TempDir(), "gigo-agent-ziti-test.log"),
+		MaxSize:  5, // MB
+	}
+	defer logWriter.Close()
+	logger := slog.Make(sloghuman.Sink(os.Stdout), sloghuman.Sink(logWriter)).Leveled(slog.LevelDebug)
 	_, err = NewAgent(context.TODO(), agentId, agentToken, logger)
 	assert.NoError(t, err)
 
