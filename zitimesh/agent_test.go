@@ -3,7 +3,6 @@ package zitimesh
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"io"
 	"net"
 	"net/http"
@@ -94,17 +93,20 @@ func TestAgent(t *testing.T) {
 	// err = ctx.RefreshServices()
 	assert.NoError(t, err)
 
+	conn, err := zitiCtx.DialWithOptions(svcName, &ziti.DialOptions{
+		AppData: []byte(`{"network":"tcp","port":42435}`),
+	})
+	assert.NoError(t, err)
+
 	// make a http request to the server over the ziti connection
 	client := http.Client{
 		Transport: &http.Transport{
 			DialContext: func(ctx context.Context, network, addr string) (netConn net.Conn, e error) {
-				return zitiCtx.DialWithOptions(svcName, &ziti.DialOptions{
-					AppData: []byte(`{"network":"tcp","port":42435}`),
-				})
+				return conn, nil
 			},
 		},
 	}
-	resp, err := client.Post(fmt.Sprintf("http://%s", svcName), "text/plain", bytes.NewBuffer([]byte("hello ziti")))
+	resp, err := client.Post("http://localhost:42435/", "text/plain", bytes.NewBuffer([]byte("hello ziti")))
 	assert.NoError(t, err)
 	assert.NotNil(t, resp)
 
