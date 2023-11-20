@@ -290,7 +290,7 @@ func (i *Post) ToFrontend() (*PostFrontend, error) {
 	awards := make([]string, 0)
 
 	// iterate award ids formatting them to string format and saving them to the above slice
-	for b := range i.Awards {
+	for _, b := range i.Awards {
 		awards = append(awards, fmt.Sprintf("%d", b))
 	}
 
@@ -298,7 +298,7 @@ func (i *Post) ToFrontend() (*PostFrontend, error) {
 	tags := make([]string, 0)
 
 	// iterate tag ids formatting them to string format and saving them to the above slice
-	for b := range i.Tags {
+	for _, b := range i.Tags {
 		tags = append(tags, fmt.Sprintf("%d", b))
 	}
 

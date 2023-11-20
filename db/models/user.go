@@ -523,7 +523,7 @@ func (i *User) ToSearch() *UserSearch {
 func (i *User) ToFrontend() (*UserFrontend, error) {
 	badges := make([]string, 0)
 
-	for b := range i.Badges {
+	for _, b := range i.Badges {
 		badges = append(badges, fmt.Sprintf("%d", b))
 	}
 

@@ -157,13 +157,13 @@ func DiscussionBackgroundFromSQLNative(db *ti.Database, rows *sql.Rows) (*Discus
 func (i *DiscussionBackground) ToFrontend() *DiscussionBackgroundFrontend {
 	awards := make([]string, 0)
 
-	for b := range i.Awards {
+	for _, b := range i.Awards {
 		awards = append(awards, fmt.Sprintf("%d", b))
 	}
 
 	tags := make([]string, 0)
 
-	for b := range i.Tags {
+	for _, b := range i.Tags {
 		tags = append(tags, fmt.Sprintf("%d", b))
 	}
 

@@ -127,7 +127,7 @@ func CommentBackgroundFromSQLNative(db *ti.Database, rows *sql.Rows) (*CommentBa
 func (i *CommentBackground) ToFrontend() *CommentBackgroundFrontend {
 	awards := make([]string, 0)
 
-	for b := range i.Awards {
+	for _, b := range i.Awards {
 		awards = append(awards, fmt.Sprintf("%d", b))
 	}
 

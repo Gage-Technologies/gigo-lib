@@ -160,13 +160,13 @@ func DiscussionFromSQLNative(db *ti.Database, rows *sql.Rows) (*Discussion, erro
 func (i *Discussion) ToFrontend() *DiscussionFrontend {
 	awards := make([]string, 0)
 
-	for b := range i.Awards {
+	for _, b := range i.Awards {
 		awards = append(awards, fmt.Sprintf("%d", b))
 	}
 
 	tags := make([]string, 0)
 
-	for b := range i.Tags {
+	for _, b := range i.Tags {
 		tags = append(tags, fmt.Sprintf("%d", b))
 	}
 
@@ -198,7 +198,7 @@ func (i *Discussion) ToSQLNative() []*SQLInsertStatement {
 	sqlStatements := make([]*SQLInsertStatement, 0)
 
 	if len(i.Awards) > 0 {
-		for b := range i.Awards {
+		for _, b := range i.Awards {
 			awardStatement := SQLInsertStatement{
 				Statement: "insert ignore into discussion_awards(discussion_id, award_id, revision) values(?, ?, ?);",
 				Values:    []interface{}{i.ID, b, i.Revision},

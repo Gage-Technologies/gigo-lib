@@ -125,7 +125,7 @@ func CommentFromSQLNative(db *ti.Database, rows *sql.Rows) (*Comment, error) {
 func (i *Comment) ToFrontend() *CommentFrontend {
 	awards := make([]string, 0)
 
-	for b := range i.Awards {
+	for _, b := range i.Awards {
 		awards = append(awards, fmt.Sprintf("%d", b))
 	}
 
@@ -154,7 +154,7 @@ func (i *Comment) ToSQLNative() []*SQLInsertStatement {
 	sqlStatements := make([]*SQLInsertStatement, 0)
 
 	if len(i.Awards) > 0 {
-		for b := range i.Awards {
+		for _, b := range i.Awards {
 			awardStatement := SQLInsertStatement{
 				Statement: "insert ignore into comment_awards(comment_id, award_id, revision) values(?, ?, ?);",
 				Values:    []interface{}{i.ID, b, i.Revision},

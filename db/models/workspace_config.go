@@ -145,7 +145,7 @@ func (c *WorkspaceConfig) ToFrontend() *WorkspaceConfigFrontend {
 	tags := make([]string, 0)
 
 	// iterate tag ids formatting them to string format and saving them to the above slice
-	for b := range c.Tags {
+	for _, b := range c.Tags {
 		tags = append(tags, fmt.Sprintf("%d", b))
 	}
 
