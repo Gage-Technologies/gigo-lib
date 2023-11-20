@@ -149,7 +149,7 @@ func (i *JourneyUnitProjects) ToFrontend() *JourneyUnitProjectsFrontend {
 	tags := make([]string, 0)
 
 	// iterate tag ids formatting them to string format and saving them to the above slice
-	for b := range i.Tags {
+	for _, b := range i.Tags {
 		tags = append(tags, fmt.Sprintf("%d", b))
 	}
 
