@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/x509"
 	"fmt"
+	"go.uber.org/atomic"
 	"time"
 
 	"github.com/gage-technologies/gigo-lib/config"
@@ -24,7 +25,7 @@ var (
 //
 // Manages the ziti mesh by creating identities, services, and service policies
 type Manager struct {
-	edge *rest_management_api_client.ZitiEdgeManagement
+	edge *atomic.Pointer[rest_management_api_client.ZitiEdgeManagement]
 }
 
 // NewManager
@@ -77,7 +78,65 @@ func NewManager(cfg config.ZitiConfig) (*Manager, error) {
 		return nil, fmt.Errorf("failed to validate connection: %w", err)
 	}
 
-	return &Manager{edge: client}, nil
+	// create a new manager
+	manager := &Manager{
+		edge: &atomic.Pointer[rest_management_api_client.ZitiEdgeManagement]{},
+	}
+
+	// auth the client
+	err = manager.authClient(cfg.ManagementUser, cfg.ManagementPass, ctrlAddress, caPool)
+	if err != nil {
+		return nil, fmt.Errorf("failed to auth client: %w", err)
+	}
+
+	// launch the renewal client auth routine
+	go manager.renewClientAuthRoutine(cfg.ManagementUser, cfg.ManagementPass, ctrlAddress, caPool)
+
+	return manager, nil
+}
+
+// authClient
+//
+// Authenticate with the ziti manager
+func (m *Manager) authClient(username string, password string, address string, caPool *x509.CertPool) error {
+	// create the edge client
+	client, err := rest_util.NewEdgeManagementClientWithUpdb(username, password, address, caPool)
+	if err != nil {
+		return fmt.Errorf("failed to create edge client: %w", err)
+	}
+
+	// list identities to validate that we have a good connection
+	limit := int64(1)
+	params := &identity.ListIdentitiesParams{
+		Context: context.Background(),
+		Limit:   &limit,
+	}
+	_, err = client.Identity.ListIdentities(params, nil)
+	if err != nil {
+		return fmt.Errorf("failed to validate connection: %w", err)
+	}
+
+	// swap the edge client
+	m.edge.Store(client)
+
+	return nil
+}
+
+// renewClientAuthRoutine
+//
+// Automatically renews the client auth every 20m
+func (m *Manager) renewClientAuthRoutine(username string, password string, address string, caPool *x509.CertPool) {
+	// create a ticker to renew the auth every 20m
+	ticker := time.NewTicker(20 * time.Minute)
+	for {
+		select {
+		case <-ticker.C:
+			err := m.authClient(username, password, address, caPool)
+			if err != nil {
+				fmt.Printf("failed to renew client auth: %v\n", err)
+			}
+		}
+	}
 }
 
 // CreateAgent
@@ -95,7 +154,7 @@ func (m *Manager) CreateAgent(id int64) (string, string, error) {
 	searchParam.Filter = &filter
 
 	// query to see if a service already exists
-	list, err := m.edge.Identity.ListIdentities(searchParam, nil)
+	list, err := m.edge.Load().Identity.ListIdentities(searchParam, nil)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to query for service: %w", err)
 	}
@@ -122,7 +181,7 @@ func (m *Manager) CreateAgent(id int64) (string, string, error) {
 	createIdentityReq.SetTimeout(10 * time.Second)
 
 	// create the identity
-	createIdentityRes, err := m.edge.Identity.CreateIdentity(createIdentityReq, nil)
+	createIdentityRes, err := m.edge.Load().Identity.CreateIdentity(createIdentityReq, nil)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to create identity: %w", err)
 	}
@@ -136,7 +195,7 @@ func (m *Manager) CreateAgent(id int64) (string, string, error) {
 		ID:      identityId,
 	}
 	params.SetTimeout(10 * time.Second)
-	resp, err := m.edge.Identity.DetailIdentity(params, nil)
+	resp, err := m.edge.Load().Identity.DetailIdentity(params, nil)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to retrieve identity: %w", err)
 	}
@@ -156,7 +215,7 @@ func (m *Manager) DeleteAgent(id int64) error {
 	searchParam.Filter = &filter
 
 	// query to see if a service already exists
-	list, err := m.edge.Identity.ListIdentities(searchParam, nil)
+	list, err := m.edge.Load().Identity.ListIdentities(searchParam, nil)
 	if err != nil {
 		return fmt.Errorf("failed to query for service: %w", err)
 	}
@@ -172,7 +231,7 @@ func (m *Manager) DeleteAgent(id int64) error {
 		ID:      *list.Payload.Data[0].ID,
 	}
 	params.SetTimeout(10 * time.Second)
-	_, err = m.edge.Identity.DeleteIdentity(params, nil)
+	_, err = m.edge.Load().Identity.DeleteIdentity(params, nil)
 	if err != nil {
 		return fmt.Errorf("failed to delete identity: %w", err)
 	}
@@ -195,7 +254,7 @@ func (m *Manager) CreateServer(id int64) (string, string, error) {
 	searchParam.Filter = &filter
 
 	// query to see if a service already exists
-	list, err := m.edge.Identity.ListIdentities(searchParam, nil)
+	list, err := m.edge.Load().Identity.ListIdentities(searchParam, nil)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to query for service: %w", err)
 	}
@@ -222,7 +281,7 @@ func (m *Manager) CreateServer(id int64) (string, string, error) {
 	createIdentityReq.SetTimeout(10 * time.Second)
 
 	// create the identity
-	createIdentityRes, err := m.edge.Identity.CreateIdentity(createIdentityReq, nil)
+	createIdentityRes, err := m.edge.Load().Identity.CreateIdentity(createIdentityReq, nil)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to create identity: %w", err)
 	}
@@ -236,7 +295,7 @@ func (m *Manager) CreateServer(id int64) (string, string, error) {
 		ID:      identityId,
 	}
 	params.SetTimeout(10 * time.Second)
-	resp, err := m.edge.Identity.DetailIdentity(params, nil)
+	resp, err := m.edge.Load().Identity.DetailIdentity(params, nil)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to retrieve identity: %w", err)
 	}
@@ -256,7 +315,7 @@ func (m *Manager) DeleteServer(id int64) error {
 	searchParam.Filter = &filter
 
 	// query to see if a service already exists
-	list, err := m.edge.Identity.ListIdentities(searchParam, nil)
+	list, err := m.edge.Load().Identity.ListIdentities(searchParam, nil)
 	if err != nil {
 		return fmt.Errorf("failed to query for service: %w", err)
 	}
@@ -272,7 +331,7 @@ func (m *Manager) DeleteServer(id int64) error {
 		ID:      *list.Payload.Data[0].ID,
 	}
 	params.SetTimeout(10 * time.Second)
-	_, err = m.edge.Identity.DeleteIdentity(params, nil)
+	_, err = m.edge.Load().Identity.DeleteIdentity(params, nil)
 	if err != nil {
 		return fmt.Errorf("failed to delete identity: %w", err)
 	}
@@ -291,7 +350,7 @@ func (m *Manager) CreateWorkspaceService(agentId int64) (string, error) {
 	searchParam.Filter = &filter
 
 	// query to see if a service already exists
-	id, err := m.edge.Service.ListServices(searchParam, nil)
+	id, err := m.edge.Load().Service.ListServices(searchParam, nil)
 	if err != nil {
 		return "", fmt.Errorf("failed to query for service: %w", err)
 	}
@@ -311,7 +370,7 @@ func (m *Manager) CreateWorkspaceService(agentId int64) (string, error) {
 		Context: context.Background(),
 	}
 	serviceParams.SetTimeout(30 * time.Second)
-	_, err = m.edge.Service.CreateService(serviceParams, nil)
+	_, err = m.edge.Load().Service.CreateService(serviceParams, nil)
 	if err != nil {
 		return "", fmt.Errorf("failed to create service: %w", err)
 	}
@@ -330,7 +389,7 @@ func (m *Manager) DeleteWorkspaceService(agentId int64) error {
 	searchParam.Filter = &filter
 
 	// query to see if a service already exists
-	id, err := m.edge.Service.ListServices(searchParam, nil)
+	id, err := m.edge.Load().Service.ListServices(searchParam, nil)
 	if err != nil {
 		return fmt.Errorf("failed to query for service: %w", err)
 	}
@@ -344,7 +403,7 @@ func (m *Manager) DeleteWorkspaceService(agentId int64) error {
 		ID:      *id.Payload.Data[0].ID,
 	}
 	params.SetTimeout(10 * time.Second)
-	_, err = m.edge.Service.DeleteService(params, nil)
+	_, err = m.edge.Load().Service.DeleteService(params, nil)
 	if err != nil {
 		return fmt.Errorf("failed to delete service: %w", err)
 	}
@@ -362,7 +421,7 @@ func (m *Manager) CreateWorkspaceServicePolicy() error {
 	searchParam.Filter = &filter
 
 	// query to see if a service policy already exists
-	id, err := m.edge.ServicePolicy.ListServicePolicies(searchParam, nil)
+	id, err := m.edge.Load().ServicePolicy.ListServicePolicies(searchParam, nil)
 	if err != nil {
 		return fmt.Errorf("failed to query for service policy: %w", err)
 	}
@@ -383,7 +442,7 @@ func (m *Manager) CreateWorkspaceServicePolicy() error {
 			Context: context.Background(),
 		}
 		params.SetTimeout(30 * time.Second)
-		_, err := m.edge.ServicePolicy.CreateServicePolicy(params, nil)
+		_, err := m.edge.Load().ServicePolicy.CreateServicePolicy(params, nil)
 		if err != nil {
 			return fmt.Errorf("failed to create service policy: %w", err)
 		}
@@ -395,7 +454,7 @@ func (m *Manager) CreateWorkspaceServicePolicy() error {
 	searchParam.Filter = &filter
 
 	// query to see if a service policy already exists
-	id, err = m.edge.ServicePolicy.ListServicePolicies(searchParam, nil)
+	id, err = m.edge.Load().ServicePolicy.ListServicePolicies(searchParam, nil)
 	if err != nil {
 		return fmt.Errorf("failed to query for service policy: %w", err)
 	}
@@ -416,7 +475,7 @@ func (m *Manager) CreateWorkspaceServicePolicy() error {
 			Context: context.Background(),
 		}
 		params.SetTimeout(30 * time.Second)
-		_, err := m.edge.ServicePolicy.CreateServicePolicy(params, nil)
+		_, err := m.edge.Load().ServicePolicy.CreateServicePolicy(params, nil)
 		if err != nil {
 			return fmt.Errorf("failed to create service policy: %w", err)
 		}
@@ -435,7 +494,7 @@ func (m *Manager) DeleteWorkspaceServicePolicy() error {
 	searchParam.Filter = &filter
 
 	// query to see if a service policy already exists
-	id, err := m.edge.ServicePolicy.ListServicePolicies(searchParam, nil)
+	id, err := m.edge.Load().ServicePolicy.ListServicePolicies(searchParam, nil)
 	if err != nil {
 		return fmt.Errorf("failed to query for service policy: %w", err)
 	}
@@ -446,7 +505,7 @@ func (m *Manager) DeleteWorkspaceServicePolicy() error {
 			ID:      *id.Payload.Data[0].ID,
 		}
 		params.SetTimeout(10 * time.Second)
-		_, err = m.edge.ServicePolicy.DeleteServicePolicy(params, nil)
+		_, err = m.edge.Load().ServicePolicy.DeleteServicePolicy(params, nil)
 		if err != nil {
 			return fmt.Errorf("failed to delete service policy: %w", err)
 		}
@@ -458,7 +517,7 @@ func (m *Manager) DeleteWorkspaceServicePolicy() error {
 	searchParam.Filter = &filter
 
 	// query to see if a service policy already exists
-	id, err = m.edge.ServicePolicy.ListServicePolicies(searchParam, nil)
+	id, err = m.edge.Load().ServicePolicy.ListServicePolicies(searchParam, nil)
 	if err != nil {
 		return fmt.Errorf("failed to query for service policy: %w", err)
 	}
@@ -469,7 +528,7 @@ func (m *Manager) DeleteWorkspaceServicePolicy() error {
 			ID:      *id.Payload.Data[0].ID,
 		}
 		params.SetTimeout(10 * time.Second)
-		_, err = m.edge.ServicePolicy.DeleteServicePolicy(params, nil)
+		_, err = m.edge.Load().ServicePolicy.DeleteServicePolicy(params, nil)
 		if err != nil {
 			return fmt.Errorf("failed to delete service policy: %w", err)
 		}
