@@ -6,10 +6,12 @@ import (
 )
 
 const (
-	ZitiSSHPort             = 1
-	ZitiReconnectingPTYPort = 2
-	ZitiSpeedtestPort       = 3
-	ZitiStatisticsPort      = 4
+	ZitiInitConnPort        = 42069
+	ZitiSSHPort             = 42070
+	ZitiReconnectingPTYPort = 42071
+	ZitiSpeedtestPort       = 42072
+	ZitiStatisticsPort      = 42073
+	ZitiSerialPort          = 42074
 
 	// MinimumListeningPort is the minimum port that the listening-ports
 	// endpoint will return to the client, and the minimum port that is accepted
@@ -23,6 +25,19 @@ const (
 	MinimumListeningPort = 9
 )
 
+var GigoReservedPorts = map[uint16]struct{}{
+	ZitiInitConnPort:        {},
+	ZitiSSHPort:             {},
+	ZitiReconnectingPTYPort: {},
+	ZitiSpeedtestPort:       {},
+	ZitiStatisticsPort:      {},
+	ZitiSerialPort:          {},
+	42075:                   {},
+	42076:                   {},
+	42077:                   {},
+	42078:                   {},
+}
+
 // IgnoredListeningPorts contains a list of ports in the global ignore list.
 // This list contains common TCP ports that are not HTTP servers, such as
 // databases, SSH, FTP, etc.
@@ -30,15 +45,6 @@ const (
 // This is implemented as a map for fast lookup.
 var IgnoredListeningPorts = map[uint16]struct{}{
 	0: {},
-	// Ports 1-8 are reserved for future use by the Coder agent.
-	1: {},
-	2: {},
-	3: {},
-	4: {},
-	5: {},
-	6: {},
-	7: {},
-	8: {},
 	// ftp
 	20: {},
 	21: {},
@@ -94,6 +100,17 @@ var IgnoredListeningPorts = map[uint16]struct{}{
 	27018: {},
 	27019: {},
 	28017: {},
+	// gigo agent operational ports
+	42069: {},
+	42070: {},
+	42071: {},
+	42072: {},
+	42073: {},
+	42074: {},
+	42075: {},
+	42076: {},
+	42077: {},
+	42078: {},
 }
 
 func init() {
