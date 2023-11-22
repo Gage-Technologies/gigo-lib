@@ -17,7 +17,7 @@ func TestCreateWorkspaceAgent(t *testing.T) {
 	version := "test"
 	secret := uuid.New()
 
-	agent := CreateWorkspaceAgent(id, wsId, version, ownerId, secret)
+	agent := CreateWorkspaceAgent(id, wsId, version, ownerId, secret, "", "")
 
 	if agent == nil {
 		t.Error("\nCreateWorkspaceAgent failed\n    Error: nil agennt")
@@ -62,7 +62,7 @@ func TestWorkspaceAgentFromSQLNative(t *testing.T) {
 	version := "test"
 	secret := uuid.New()
 
-	agent := CreateWorkspaceAgent(id, wsId, version, ownerId, secret)
+	agent := CreateWorkspaceAgent(id, wsId, version, ownerId, secret, "", "")
 
 	agent.CreatedAt = time.Now().Add(-time.Hour)
 	agent.UpdatedAt = time.Now().Add(-time.Minute)

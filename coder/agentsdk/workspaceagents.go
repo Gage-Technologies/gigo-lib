@@ -3,23 +3,20 @@ package agentsdk
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"github.com/gage-technologies/gigo-lib/db/models"
 	"io"
 	"net"
 	"net/http"
 	"net/http/cookiejar"
-	"net/netip"
 	"time"
 
-	"github.com/google/uuid"
+	"github.com/gage-technologies/gigo-lib/db/models"
+
 	"golang.org/x/xerrors"
 	"nhooyr.io/websocket"
 
 	"cdr.dev/slog"
 	"github.com/coder/retry"
-	"github.com/gage-technologies/gigo-lib/coder/tailnet"
 )
 
 // InitializeWorkspaceAgent fetches metadata for the currently authenticated workspace agent.
@@ -146,122 +143,6 @@ func (c *AgentClient) ListenWorkspaceAgent(ctx context.Context) (net.Conn, error
 	}()
 
 	return websocket.NetConn(ctx, conn, websocket.MessageBinary), nil
-}
-
-// DialWorkspaceAgent
-//
-//	Not Implemented - goes nowhere
-func (c *AgentClient) DialWorkspaceAgent(ctx context.Context, agentID uuid.UUID, options *DialWorkspaceAgentOptions) (*AgentConn, error) {
-	if options == nil {
-		options = &DialWorkspaceAgentOptions{}
-	}
-	res, err := c.Request(ctx, http.MethodGet, fmt.Sprintf("/api/v2/workspaceagents/%s/connection", agentID), nil)
-	if err != nil {
-		return nil, err
-	}
-	defer res.Body.Close()
-	if res.StatusCode != http.StatusOK {
-		return nil, readBodyAsError(res)
-	}
-	var connInfo WorkspaceAgentConnectionInfo
-	err = json.NewDecoder(res.Body).Decode(&connInfo)
-	if err != nil {
-		return nil, xerrors.Errorf("decode conn info: %w", err)
-	}
-
-	ip := tailnet.IP()
-	nodeId := options.SnowflakeNode.Generate().Int64()
-	conn, err := tailnet.NewConn(tailnet.ConnTypeServer, &tailnet.Options{
-		NodeID:         nodeId,
-		Addresses:      []netip.Prefix{netip.PrefixFrom(ip, 128)},
-		DERPMap:        connInfo.DERPMap,
-		BlockEndpoints: options.BlockEndpoints,
-	}, options.Logger)
-	if err != nil {
-		return nil, xerrors.Errorf("create tailnet: %w", err)
-	}
-
-	coordinateURL, err := c.URL.Parse(fmt.Sprintf("/api/v2/workspaceagents/%s/coordinate", agentID))
-	if err != nil {
-		return nil, xerrors.Errorf("parse url: %w", err)
-	}
-	jar, err := cookiejar.New(nil)
-	if err != nil {
-		return nil, xerrors.Errorf("create cookie jar: %w", err)
-	}
-	auth := c.SessionAuth()
-	jar.SetCookies(coordinateURL, []*http.Cookie{
-		{
-			Name:  WorkspaceIDHeader,
-			Value: fmt.Sprintf("%d", auth.WorkspaceID),
-		},
-		{
-			Name:  AgentTokenHeader,
-			Value: auth.Token,
-		},
-	})
-	httpClient := &http.Client{
-		Jar:       jar,
-		Transport: c.HTTPClient.Transport,
-	}
-	ctx, cancelFunc := context.WithCancel(ctx)
-	closed := make(chan struct{})
-	first := make(chan error)
-	go func() {
-		defer close(closed)
-		isFirst := true
-		for retrier := retry.New(50*time.Millisecond, 10*time.Second); retrier.Wait(ctx); {
-			options.Logger.Debug(ctx, "connecting")
-			// nolint:bodyclose
-			ws, res, err := websocket.Dial(ctx, coordinateURL.String(), &websocket.DialOptions{
-				HTTPClient: httpClient,
-				// Need to disable compression to avoid a data-race.
-				CompressionMode: websocket.CompressionDisabled,
-			})
-			if isFirst {
-				if res != nil && res.StatusCode == http.StatusConflict {
-					first <- readBodyAsError(res)
-					return
-				}
-				isFirst = false
-				close(first)
-			}
-			if err != nil {
-				if errors.Is(err, context.Canceled) {
-					return
-				}
-				options.Logger.Debug(ctx, "failed to dial", slog.Error(err))
-				continue
-			}
-			errChan := conn.ConnectToCoordinator(websocket.NetConn(ctx, ws, websocket.MessageBinary))
-			options.Logger.Debug(ctx, "serving coordinator")
-			err = <-errChan
-			if errors.Is(err, context.Canceled) {
-				_ = ws.Close(websocket.StatusGoingAway, "")
-				return
-			}
-			if err != nil {
-				options.Logger.Debug(ctx, "error serving coordinator", slog.Error(err))
-				_ = ws.Close(websocket.StatusGoingAway, "")
-				continue
-			}
-			_ = ws.Close(websocket.StatusGoingAway, "")
-		}
-	}()
-	err = <-first
-	if err != nil {
-		cancelFunc()
-		_ = conn.Close()
-		return nil, err
-	}
-
-	return &AgentConn{
-		Conn: conn,
-		CloseFunc: func() {
-			cancelFunc()
-			<-closed
-		},
-	}, nil
 }
 
 func (c *AgentClient) PostWorkspaceAgentVersion(ctx context.Context, version string) error {
