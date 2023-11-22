@@ -266,13 +266,23 @@ func (a *Agent) handleConnection(zitiConn edge.Conn, fctx ForwardContext) {
 		return
 	}
 
-	// dial the localport
-	localConn, err := net.Dial(string(localConfig.Network), fmt.Sprintf("localhost:%d", localConfig.Port))
-	if err != nil {
-		a.logger.Warn(a.ctx, "failed to dial local port", slog.F("agent_name", a.Name), slog.Error(err))
-		return
+	// dial the local port up to 5 times waiting 1 second between each attempt
+	var localConn net.Conn
+	for i := 0; i < 5; i++ {
+		localConn, err = net.Dial(string(localConfig.Network), fmt.Sprintf("localhost:%d", localConfig.Port))
+		if err != nil {
+			if localConn != nil {
+				localConn.Close()
+			}
+			a.logger.Warn(a.ctx, "failed to dial local port", slog.F("agent_name", a.Name), slog.Error(err))
+			if i == 4 {
+				return
+			}
+			time.Sleep(time.Second)
+			continue
+		}
+		break
 	}
-	defer localConn.Close()
 
 	// copy input from the zitinet to the local port
 	a.wg.Go(func() {
