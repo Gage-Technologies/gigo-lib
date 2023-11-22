@@ -40,9 +40,6 @@ type Agent struct {
 	// Name if name of the agent on the ziti network
 	Name string
 
-	// token is the JWT token used to authenticate the agent with the Ziti controller
-	token string
-
 	// ctx is the context used to manage the agent
 	ctx context.Context
 
@@ -76,16 +73,10 @@ type Agent struct {
 
 // NewAgent
 //
-// Create a new Ziti agent.
-func NewAgent(ctx context.Context, name string, token string, logger slog.Logger) (*Agent, error) {
-	// enroll the identity into a configuration
-	zitiConfig, err := EnrollIdentity(token)
-	if err != nil {
-		return nil, fmt.Errorf("failed to enroll identity: %w", err)
-	}
-
+// Creates a new ziti agent from the existing identity
+func NewAgent(ctx context.Context, name string, identity *ziti.Config, logger slog.Logger) (*Agent, error) {
 	// create a new Ziti context
-	zitiCtx, err := ziti.NewContext(zitiConfig)
+	zitiCtx, err := ziti.NewContext(identity)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create Ziti context: %w", err)
 	}
@@ -96,7 +87,6 @@ func NewAgent(ctx context.Context, name string, token string, logger slog.Logger
 	// create the agent
 	agent := &Agent{
 		Name:        name,
-		token:       token,
 		ctx:         ctx,
 		cancel:      cancel,
 		zitiCtx:     zitiCtx,
@@ -123,6 +113,24 @@ func NewAgent(ctx context.Context, name string, token string, logger slog.Logger
 	agent.wg.Go(agent.serviceWatcher)
 
 	return agent, nil
+}
+
+// NewAgentFromToken
+//
+// Create a new Ziti agent from an enrollment token.
+func NewAgentFromToken(ctx context.Context, name string, token string, logger slog.Logger) (*Agent, *ziti.Config, error) {
+	// enroll the identity into a configuration
+	zitiConfig, err := EnrollIdentity(token)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to enroll identity: %w", err)
+	}
+
+	// create a new agent
+	agent, err := NewAgent(ctx, name, zitiConfig, logger)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to create agent: %w", err)
+	}
+	return agent, zitiConfig, nil
 }
 
 func (a *Agent) Close() {

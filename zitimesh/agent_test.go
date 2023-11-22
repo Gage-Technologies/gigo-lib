@@ -75,7 +75,9 @@ func TestAgent(t *testing.T) {
 	}
 	defer logWriter.Close()
 	logger := slog.Make(sloghuman.Sink(os.Stdout), sloghuman.Sink(logWriter)).Leveled(slog.LevelDebug)
-	agent, err := NewAgent(context.TODO(), agentId, agentToken, logger)
+	_, identity, err := NewAgentFromToken(context.TODO(), agentId, agentToken, logger)
+	assert.NoError(t, err)
+	agent, err := NewAgent(context.TODO(), agentId, identity, logger)
 	assert.NoError(t, err)
 
 	// Test creating a workspace service
