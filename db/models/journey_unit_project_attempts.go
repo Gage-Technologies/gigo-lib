@@ -23,6 +23,7 @@ type JourneyUnitProjectAttempts struct {
 	Tags                  []*JourneyTags         `json:"tags" sql:"tags"`
 	Dependencies          []*JourneyDependencies `json:"dependencies" sql:"dependencies"`
 	EstimatedTutorialTime *time.Duration         `json:"estimated_tutorial_time,omitempty" sql:"estimated_tutorial_time"`
+	Deleted               bool                   `json:"deleted" sql:"deleted"`
 }
 
 type JourneyUnitProjectAttemptsSQL struct {
@@ -35,6 +36,7 @@ type JourneyUnitProjectAttemptsSQL struct {
 	Description           string              `json:"description" sql:"description"`
 	ProjectLanguage       ProgrammingLanguage `json:"project_language" sql:"project_language"`
 	EstimatedTutorialTime *time.Duration      `json:"estimated_tutorial_time,omitempty" sql:"estimated_tutorial_time"`
+	Deleted               bool                `json:"deleted" sql:"deleted"`
 }
 
 type JourneyUnitProjectAttemptsFrontend struct {
@@ -148,6 +150,7 @@ func JourneyUnitProjectAttemptsFromSQLNative(db *ti.Database, rows *sql.Rows) (*
 		Tags:                  tags,
 		Dependencies:          deps,
 		EstimatedTutorialTime: journeyUnitProjects.EstimatedTutorialTime,
+		Deleted:               journeyUnitProjects.Deleted,
 	}, nil
 }
 
@@ -202,8 +205,8 @@ func (i *JourneyUnitProjectAttempts) ToSQLNative() []*SQLInsertStatement {
 	}
 
 	sqlStatements = append(sqlStatements, &SQLInsertStatement{
-		Statement: "insert ignore into journey_unit_project_attempts (_id, unit_id, parent_project, is_completed, working_directory, title, description, project_language, estimated_tutorial_time) values (?,?,?,?,?,?,?,?,?);",
-		Values:    []interface{}{i.ID, i.UnitID, i.ParentProject, i.IsCompleted, i.WorkingDirectory, i.Title, i.Description, i.ProjectLanguage, i.EstimatedTutorialTime},
+		Statement: "insert ignore into journey_unit_project_attempts (_id, unit_id, parent_project, is_completed, working_directory, title, description, project_language, estimated_tutorial_time, deleted) values (?,?,?,?,?,?,?,?,?,?);",
+		Values:    []interface{}{i.ID, i.UnitID, i.ParentProject, i.IsCompleted, i.WorkingDirectory, i.Title, i.Description, i.ProjectLanguage, i.EstimatedTutorialTime, i.Deleted},
 	})
 
 	return sqlStatements

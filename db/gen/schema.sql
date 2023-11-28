@@ -696,7 +696,8 @@ create table
         workspace_config bigint not null,
         workspace_config_revision bigint not null,
         workspace_settings json,
-        estimated_tutorial_time bigint
+        estimated_tutorial_time bigint,
+        deleted boolean not null default false
     );
 
 create table
@@ -716,7 +717,8 @@ create table
         title varchar(50) not null,
         description varchar(500) not null,
         project_language int not null,
-        estimated_time_completion bigint
+        estimated_time_completion bigint,
+        deleted boolean not null default false
     );
 
 create table
@@ -744,7 +746,8 @@ create table
         title varchar(50) not null,
         description varchar(500) not null,
         project_language int not null,
-        estimated_tutorial_time bigint not null
+        estimated_tutorial_time bigint not null,
+        deleted boolean not null default false
     );
 
 
@@ -767,7 +770,8 @@ create table
         workspace_config bigint not null,
         workspace_config_revision bigint not null,
         workspace_settings json,
-        estimated_tutorial_time bigint
+        estimated_tutorial_time bigint,
+        deleted boolean not null default false
     )
 create table
     if not exists user_inactivity (

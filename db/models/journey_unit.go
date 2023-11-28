@@ -67,6 +67,7 @@ type JourneyUnit struct {
 	WorkspaceConfigRevision int                     `json:"workspace_config_revision" sql:"workspace_config_revision"`
 	WorkspaceSettings       *WorkspaceSettings      `json:"workspace_settings" sql:"workspace_settings"`
 	EstimatedTutorialTime   *time.Duration          `json:"estimated_tutorial_time,omitempty" sql:"estimated_tutorial_time"`
+	Deleted                 bool                    `json:"deleted" sql:"deleted"`
 }
 
 type JourneyUnitSQL struct {
@@ -88,6 +89,7 @@ type JourneyUnitSQL struct {
 	WorkspaceConfigRevision int            `json:"workspace_config_revision" sql:"workspace_config_revision"`
 	WorkspaceSettings       []byte         `json:"workspace_settings" sql:"workspace_settings"`
 	EstimatedTutorialTime   *time.Duration `json:"estimated_tutorial_time,omitempty" sql:"estimated_tutorial_time"`
+	Deleted                 bool           `json:"deleted" sql:"deleted"`
 }
 
 type JourneyUnitFrontend struct {
@@ -226,6 +228,7 @@ func JourneyUnitFromSQLNative(db *ti.Database, rows *sql.Rows) (*JourneyUnit, er
 		Completions:             journeyUnitSQL.Completions,
 		Attempts:                journeyUnitSQL.Attempts,
 		WorkspaceConfigRevision: journeyUnitSQL.WorkspaceConfigRevision,
+		Deleted:                 journeyUnitSQL.Deleted,
 	}, nil
 }
 
@@ -281,10 +284,10 @@ func (i *JourneyUnit) ToSQLNative() ([]*SQLInsertStatement, error) {
 	}
 
 	sqlStatements = append(sqlStatements, &SQLInsertStatement{
-		Statement: "insert ignore into journey_units (_id, title, unit_focus, author_id, visibility, description, repo_id, created_at, updated_at, challenge_cost, completions, attempts, tier, embedded, workspace_config, workspace_config_revision, workspace_settings, estimated_tutorial_time) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);",
+		Statement: "insert ignore into journey_units (_id, title, unit_focus, author_id, visibility, description, repo_id, created_at, updated_at, challenge_cost, completions, attempts, tier, embedded, workspace_config, workspace_config_revision, workspace_settings, estimated_tutorial_time, deleted) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);",
 		Values: []interface{}{i.ID, i.Title, i.UnitFocus.String(), i.AuthorID, i.Visibility, i.Description, i.RepoID, i.CreatedAt,
 			i.UpdatedAt, i.ChallengeCost, i.Completions, i.Attempts, i.Tier, i.Embedded, i.WorkspaceConfig,
-			i.WorkspaceConfigRevision, buf, i.EstimatedTutorialTime},
+			i.WorkspaceConfigRevision, buf, i.EstimatedTutorialTime, i.Deleted},
 	})
 
 	return sqlStatements, nil

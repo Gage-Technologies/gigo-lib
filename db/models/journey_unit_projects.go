@@ -22,6 +22,7 @@ type JourneyUnitProjects struct {
 	Tags                  []*JourneyTags         `json:"tags" sql:"tags"`
 	Dependencies          []*JourneyDependencies `json:"dependencies" sql:"dependencies"`
 	EstimatedTutorialTime *time.Duration         `json:"estimated_tutorial_time,omitempty" sql:"estimated_tutorial_time"`
+	Deleted               bool                   `json:"deleted,omitempty" sql:"deleted"`
 }
 
 type JourneyUnitProjectsSQL struct {
@@ -33,6 +34,7 @@ type JourneyUnitProjectsSQL struct {
 	Description           string              `json:"description" sql:"description"`
 	ProjectLanguage       ProgrammingLanguage `json:"project_language" sql:"project_language"`
 	EstimatedTutorialTime *time.Duration      `json:"estimated_tutorial_time,omitempty" sql:"estimated_tutorial_time"`
+	Deleted               bool                `json:"deleted,omitempty" sql:"deleted"`
 }
 
 type JourneyUnitProjectsFrontend struct {
@@ -141,6 +143,7 @@ func JourneyUnitProjectsFromSQLNative(db *ti.Database, rows *sql.Rows) (*Journey
 		Tags:                  tags,
 		Dependencies:          deps,
 		EstimatedTutorialTime: journeyUnitProjects.EstimatedTutorialTime,
+		Deleted:               journeyUnitProjects.Deleted,
 	}, nil
 }
 
@@ -194,8 +197,8 @@ func (i *JourneyUnitProjects) ToSQLNative() []*SQLInsertStatement {
 	}
 
 	sqlStatements = append(sqlStatements, &SQLInsertStatement{
-		Statement: "insert ignore into journey_unit_projects (_id, unit_id, completions, working_directory, title, description, project_language, estimated_tutorial_time) values (?,?,?,?,?,?,?,?);",
-		Values:    []interface{}{i.ID, i.UnitID, i.Completions, i.WorkingDirectory, i.Title, i.Description, i.ProjectLanguage, i.EstimatedTutorialTime},
+		Statement: "insert ignore into journey_unit_projects (_id, unit_id, completions, working_directory, title, description, project_language, estimated_tutorial_time, deleted) values (?,?,?,?,?,?,?,?,?);",
+		Values:    []interface{}{i.ID, i.UnitID, i.Completions, i.WorkingDirectory, i.Title, i.Description, i.ProjectLanguage, i.EstimatedTutorialTime, i.Deleted},
 	})
 
 	return sqlStatements
