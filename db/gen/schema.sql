@@ -663,10 +663,11 @@ create table
     );
 create table
     if not exists user_inactivity (
-          user_id bigint not null primary key,
-          last_login datetime not null,
-          last_notified datetime not null,
-          send_week boolean not null,
-          send_month boolean not null,
-          notify_on datetime not null
+        user_id bigint not null primary key,
+        last_login datetime not null,
+        last_notified datetime not null,
+        send_week boolean not null,
+        send_month boolean not null,
+        notify_on datetime not null,
+        email varchar(280) not null
     );

@@ -1,0 +1,1 @@
+ALTER TABLE user_inactivity ADD COLUMN email varchar(280) not null;
