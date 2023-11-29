@@ -1,0 +1,1 @@
+ALTER TABLE user_inactivity MODIFY COLUMN notify_on datetime NULL;

@@ -668,6 +668,6 @@ create table
         last_notified datetime not null,
         send_week boolean not null,
         send_month boolean not null,
-        notify_on datetime not null,
+        notify_on datetime,
         email varchar(280) not null
     );

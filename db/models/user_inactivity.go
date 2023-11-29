@@ -7,34 +7,34 @@ import (
 )
 
 type UserInactivity struct {
-	UserId       int64     `json:"user_id" sql:"user_id"`
-	LastLogin    time.Time `json:"last_login" sql:"last_login"`
-	LastNotified time.Time `json:"last_notified" sql:"last_notified"`
-	SendWeek     bool      `json:"send_week" sql:"send_week"`
-	SendMonth    bool      `json:"send_month" sql:"send_month"`
-	NotifyOn     time.Time `json:"notify_on" sql:"notify_on"`
-	Email        string    `json:"email" sql:"email"`
+	UserId       int64      `json:"user_id" sql:"user_id"`
+	LastLogin    time.Time  `json:"last_login" sql:"last_login"`
+	LastNotified time.Time  `json:"last_notified" sql:"last_notified"`
+	SendWeek     bool       `json:"send_week" sql:"send_week"`
+	SendMonth    bool       `json:"send_month" sql:"send_month"`
+	NotifyOn     *time.Time `json:"notify_on" sql:"notify_on"`
+	Email        string     `json:"email" sql:"email"`
 }
 
 type UserInactivitySQL struct {
-	UserId       int64     `json:"user_id" sql:"user_id"`
-	LastLogin    time.Time `json:"last_login" sql:"last_login"`
-	LastNotified time.Time `json:"last_notified" sql:"last_notified"`
-	SendWeek     bool      `json:"send_week" sql:"send_week"`
-	SendMonth    bool      `json:"send_month" sql:"send_month"`
-	NotifyOn     time.Time `json:"notify_on" sql:"notify_on"`
-	Email        string    `json:"email" sql:"email"`
+	UserId       int64      `json:"user_id" sql:"user_id"`
+	LastLogin    time.Time  `json:"last_login" sql:"last_login"`
+	LastNotified time.Time  `json:"last_notified" sql:"last_notified"`
+	SendWeek     bool       `json:"send_week" sql:"send_week"`
+	SendMonth    bool       `json:"send_month" sql:"send_month"`
+	NotifyOn     *time.Time `json:"notify_on" sql:"notify_on"`
+	Email        string     `json:"email" sql:"email"`
 }
 
 func CreateUserInactivity(userId int64, lastLogin time.Time, lastNotified time.Time, sendWeek bool, sendMonth bool,
-	notifyOn time.Time, email string) (*UserInactivity, error) {
+	email string) (*UserInactivity, error) {
 	return &UserInactivity{
 		UserId:       userId,
 		LastLogin:    lastLogin,
 		LastNotified: lastNotified,
 		SendWeek:     sendWeek,
 		SendMonth:    sendMonth,
-		NotifyOn:     notifyOn,
+		NotifyOn:     nil,
 		Email:        email,
 	}, nil
 }
