@@ -283,10 +283,16 @@ func (i *JourneyUnit) ToSQLNative() ([]*SQLInsertStatement, error) {
 		sqlStatements = append(sqlStatements, s...)
 	}
 
+	var cost string
+
+	if i.ChallengeCost != nil {
+		cost = *i.ChallengeCost
+	}
+
 	sqlStatements = append(sqlStatements, &SQLInsertStatement{
 		Statement: "insert ignore into journey_units (_id, title, unit_focus, author_id, visibility, description, repo_id, created_at, updated_at, challenge_cost, completions, attempts, tier, embedded, workspace_config, workspace_config_revision, workspace_settings, estimated_tutorial_time, deleted) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);",
 		Values: []interface{}{i.ID, i.Title, i.UnitFocus.String(), i.AuthorID, i.Visibility, i.Description, i.RepoID, i.CreatedAt,
-			i.UpdatedAt, i.ChallengeCost, i.Completions, i.Attempts, i.Tier, i.Embedded, i.WorkspaceConfig,
+			i.UpdatedAt, cost, i.Completions, i.Attempts, i.Tier, i.Embedded, i.WorkspaceConfig,
 			i.WorkspaceConfigRevision, buf, i.EstimatedTutorialTime, i.Deleted},
 	})
 
