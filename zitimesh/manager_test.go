@@ -40,7 +40,7 @@ func TestManager(t *testing.T) {
 	assert.NotEmpty(t, agentId)
 
 	// Test creating a workspace service
-	defer manager.DeleteWorkspaceService(420)
-	_, err = manager.CreateWorkspaceService(420)
+	defer manager.DeleteWorkspaceService()
+	_, err = manager.CreateWorkspaceService()
 	assert.NoError(t, err)
 }

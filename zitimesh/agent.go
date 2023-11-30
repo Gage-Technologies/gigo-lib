@@ -215,10 +215,13 @@ func (a *Agent) startPortListener(fctx ForwardContext) {
 	// defer the closing of the done channel
 	defer close(fctx.Done)
 
+	fmt.Printf("startPortListener: %v\n", fctx.Service)
+
 	// create a listener on the zitinet for the service
 	listener, err := a.zitiCtx.ListenWithOptions(fctx.Service, &ziti.ListenOptions{
-		ConnectTimeout: 5 * time.Minute,
-		MaxConnections: 64,
+		ConnectTimeout:        5 * time.Minute,
+		MaxConnections:        64,
+		BindUsingEdgeIdentity: true,
 	})
 	if err != nil {
 		a.logger.Warn(fctx.Ctx, "failed to listen on service", slog.F("agent_name", a.Name), slog.F("service", fctx.Service), slog.Error(err))

@@ -342,9 +342,9 @@ func (m *Manager) DeleteServer(id int64) error {
 // CreateWorkspaceService
 //
 // Creates a service in the ziti mesh
-func (m *Manager) CreateWorkspaceService(agentId int64) (string, error) {
+func (m *Manager) CreateWorkspaceService() (string, error) {
 	// create filter to search for service
-	name := fmt.Sprintf("gigo-workspace-access-%d", agentId)
+	name := "gigo-workspace-access"
 	searchParam := service.NewListServicesParams()
 	filter := fmt.Sprintf("name=\"%s\"", name)
 	searchParam.Filter = &filter
@@ -381,9 +381,9 @@ func (m *Manager) CreateWorkspaceService(agentId int64) (string, error) {
 // DeleteWorkspaceService
 //
 // Deletes a service from the ziti mesh
-func (m *Manager) DeleteWorkspaceService(agentId int64) error {
+func (m *Manager) DeleteWorkspaceService() error {
 	// create filter to search for service
-	name := fmt.Sprintf("gigo-workspace-access-%d", agentId)
+	name := "gigo-workspace-access"
 	searchParam := service.NewListServicesParams()
 	filter := fmt.Sprintf("name=\"%s\"", name)
 	searchParam.Filter = &filter

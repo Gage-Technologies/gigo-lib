@@ -3,9 +3,10 @@ package zitimesh
 import (
 	"context"
 	"fmt"
+	"net"
+
 	"github.com/gage-technologies/gigo-lib/logging"
 	"github.com/openziti/sdk-golang/ziti"
-	"net"
 )
 
 // Server
@@ -69,6 +70,7 @@ func (s *Server) DialAgent(agentId int64, network NetworkType, port int) (net.Co
 
 	// dial the agent
 	return s.zitiCtx.DialWithOptions(fmt.Sprintf("gigo-workspace-access-%d", agentId), &ziti.DialOptions{
-		AppData: []byte(fmt.Sprintf(`{"network":"%s","port":%d}`, network, port)),
+		AppData:  []byte(fmt.Sprintf(`{"network":"%s","port":%d}`, network, port)),
+		Identity: fmt.Sprintf("gigo-ws-agent-%d", agentId),
 	})
 }

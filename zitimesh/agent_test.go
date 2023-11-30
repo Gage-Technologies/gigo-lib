@@ -52,6 +52,11 @@ func TestAgent(t *testing.T) {
 	err = manager.CreateWorkspaceServicePolicy()
 	assert.NoError(t, err)
 
+	// Test creating a workspace service
+	defer manager.DeleteWorkspaceService()
+	svcName, err := manager.CreateWorkspaceService()
+	assert.NoError(t, err)
+
 	defer manager.DeleteServer(169)
 	serverId, serverToken, err := manager.CreateServer(169)
 	assert.NoError(t, err)
@@ -80,11 +85,6 @@ func TestAgent(t *testing.T) {
 	agent, err := NewAgent(context.TODO(), agentId, identity, logger)
 	assert.NoError(t, err)
 
-	// Test creating a workspace service
-	defer manager.DeleteWorkspaceService(1420)
-	svcName, err := manager.CreateWorkspaceService(1420)
-	assert.NoError(t, err)
-
 	// create a new ziti context for the server side
 	// enroll the identity into a configuration
 	zitiCtxConfig, err := EnrollIdentity(serverToken)
@@ -98,7 +98,8 @@ func TestAgent(t *testing.T) {
 	assert.NoError(t, err)
 
 	conn, err := zitiCtx.DialWithOptions(svcName, &ziti.DialOptions{
-		AppData: []byte(`{"network":"tcp","port":42435}`),
+		AppData:  []byte(`{"network":"tcp","port":42435}`),
+		Identity: "gigo-ws-agent-1420",
 	})
 	assert.NoError(t, err)
 
