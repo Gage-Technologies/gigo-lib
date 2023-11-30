@@ -69,7 +69,7 @@ func (s *Server) DialAgent(agentId int64, network NetworkType, port int) (net.Co
 	_ = s.zitiCtx.RefreshServices()
 
 	// dial the agent
-	return s.zitiCtx.DialWithOptions(fmt.Sprintf("gigo-workspace-access-%d", agentId), &ziti.DialOptions{
+	return s.zitiCtx.DialWithOptions("gigo-workspace-access", &ziti.DialOptions{
 		AppData:  []byte(fmt.Sprintf(`{"network":"%s","port":%d}`, network, port)),
 		Identity: fmt.Sprintf("gigo-ws-agent-%d", agentId),
 	})
