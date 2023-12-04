@@ -74,7 +74,7 @@ type ListeningPort struct {
 }
 
 func (l *ListeningPort) String() string {
-	return fmt.Sprintf("%s:%d:%s", l.Network, l.Port, l.ProcessName)
+	return fmt.Sprintf("%s:%v:%v:%d:%s", l.Network, l.SSL, l.HTTP, l.Port, l.ProcessName)
 }
 
 type AgentPorts struct {
