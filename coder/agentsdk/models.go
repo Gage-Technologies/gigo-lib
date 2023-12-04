@@ -69,6 +69,8 @@ type ListeningPort struct {
 	ProcessName string               `json:"process_name"` // may be empty
 	Network     ListeningPortNetwork `json:"network"`      // only "tcp" at the moment
 	Port        uint16               `json:"port"`
+	HTTP        bool                 `json:"http"`
+	SSL         bool                 `json:"ssl"`
 }
 
 func (l *ListeningPort) String() string {

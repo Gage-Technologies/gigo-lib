@@ -117,6 +117,8 @@ type WorkspacePort struct {
 	Port       uint16 `json:"port"`
 	Configured bool   `json:"configured"`
 	Active     bool   `json:"active"`
+	HTTP       bool   `json:"http"`
+	SSL        bool   `json:"ssl"`
 }
 
 type WorkspacePortFrontend struct {
@@ -125,6 +127,8 @@ type WorkspacePortFrontend struct {
 	Url        string `json:"url"`
 	Configured bool   `json:"configured"`
 	Active     bool   `json:"active"`
+	HTTP       bool   `json:"http"`
+	SSL        bool   `json:"ssl"`
 }
 
 func (p *WorkspacePort) ToFrontend(userId int64, workspaceId int64, hostname string, https bool) *WorkspacePortFrontend {
