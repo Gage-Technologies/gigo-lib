@@ -673,13 +673,15 @@ create table
     );
 create table
     if not exists email_subscription (
-        user_id bigint not null primary key,
-        all_emails  boolean not null,
-        streak  boolean not null,
-        pro boolean not null,
-        newsletter boolean not null,
-        inactivity  boolean not null,
-        messages  boolean not null,
-        referrals boolean not null,
-        promotional boolean not null,
+        user_id BIGINT NOT NULL,
+        user_email VARCHAR(280) NOT NULL,
+        all_emails BOOLEAN NOT NULL,
+        streak BOOLEAN NOT NULL,
+        pro BOOLEAN NOT NULL,
+        newsletter BOOLEAN NOT NULL,
+        inactivity BOOLEAN NOT NULL,
+        messages BOOLEAN NOT NULL,
+        referrals BOOLEAN NOT NULL,
+        promotional BOOLEAN NOT NULL,
+        PRIMARY KEY (user_id, user_email)
     );
