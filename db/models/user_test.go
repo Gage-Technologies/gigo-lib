@@ -16,7 +16,7 @@ func TestCreateUser(t *testing.T) {
 	user, err := CreateUser(69, "test", "testpass", "testemail@email.com",
 		"phone", UserStatusBasic, "test", badges, []int64{1, 2, 3},
 		"first", "last", 23, "", DefaultUserStart, "America/Chicago",
-		AvatarSettings{}, 0)
+		AvatarSettings{}, 0, nil)
 
 	if err != nil {
 		t.Errorf("failed to create user, err: %v", err)
@@ -176,11 +176,12 @@ func TestUser_ToFromSQLNative(t *testing.T) {
 	defer db.DB.Exec("DROP TABLE user_saved_posts")
 
 	badges := []int64{1, 2}
+	referredBy := int64(142069)
 
 	user, err := CreateUser(69, "test", "testpass", "testemail@email.com",
 		"phone", UserStatusBasic, "test", badges, []int64{1, 2, 3},
 		"first", "last", 23, "", DefaultUserStart, "America/Chicago",
-		AvatarSettings{}, 0)
+		AvatarSettings{}, 0, &referredBy)
 	if err != nil {
 		t.Errorf("failed user to sql native, err: %v", err)
 		return
@@ -343,6 +344,11 @@ func TestUser_ToFromSQLNative(t *testing.T) {
 		return
 	}
 
+	if user.ReferredBy == nil || *user.ReferredBy != 142069 {
+		t.Errorf("\nToSQlNative User Table\n    Error: incorrect value returned for user referred by")
+		return
+	}
+
 	t.Logf("User To SQL Native Succeeded")
 }
 
@@ -359,7 +365,7 @@ func TestInsertUser(t *testing.T) {
 	user, err := CreateUser(6942069, "test", "testpass", "testemail@email.com",
 		"phone", UserStatusBasic, "test", badges, []int64{1, 2, 3},
 		"first", "last", 23, "", DefaultUserStart, "America/Chicago",
-		AvatarSettings{}, 0)
+		AvatarSettings{}, 0, nil)
 	if err != nil {
 		t.Errorf("\nTestInsertUser\n    Error: %v", err)
 		return

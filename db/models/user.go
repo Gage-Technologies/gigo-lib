@@ -7,15 +7,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/gage-technologies/gigo-lib/db"
+	"strings"
+	"time"
+
+	ti "github.com/gage-technologies/gigo-lib/db"
 	"github.com/gage-technologies/gigo-lib/session"
 	"github.com/gage-technologies/gigo-lib/storage"
 	"github.com/gage-technologies/gigo-lib/utils"
 	"github.com/gage-technologies/gotp"
 	"github.com/kisielk/sqlstruct"
 	"go.opentelemetry.io/otel"
-	"strings"
-	"time"
 )
 
 type UserStatus int
@@ -96,6 +97,8 @@ type User struct {
 	StripeAccount      *string `json:"stripe_account,omitempty" sql:"stripe_account,omitempty"`
 	StripeSubscription *string `json:"stripe_subscription" sql:"stripe_subscription"`
 	FollowerCount      uint64  `json:"follower_count" sql:"follower_count"`
+
+	ReferredBy *int64 `json:"referred_by" sql:"referred_by"`
 }
 
 type UserSQL struct {
@@ -141,6 +144,8 @@ type UserSQL struct {
 	StripeAccount      *string `json:"stripe_account" sql:"stripe_account"`
 	StripeSubscription *string `json:"stripe_subscription" sql:"stripe_subscription"`
 	FollowerCount      uint64  `json:"follower_count" sql:"follower_count"`
+
+	ReferredBy *int64 `json:"referred_by" sql:"referred_by"`
 }
 
 type UserSearch struct {
@@ -180,7 +185,7 @@ type UserFrontend struct {
 func CreateUser(id int64, userName string, password string, email string, phone string,
 	userStatus UserStatus, bio string, badges []int64, savedPosts []int64, firstName string,
 	lasName string, giteaID int64, externalAuth string, starInfo UserStart, timezone string, avatar AvatarSettings,
-	broadcastThreshold uint64) (*User, error) {
+	broadcastThreshold uint64, referredBy *int64) (*User, error) {
 
 	// hash password
 	hashedPass, err := utils.HashPassword(password)
@@ -233,6 +238,7 @@ func CreateUser(id int64, userName string, password string, email string, phone 
 		HasBroadcast:        false,
 		HolidayThemes:       true,
 		Tutorials:           &DefaultUserTutorial,
+		ReferredBy:          referredBy,
 	}, nil
 }
 
@@ -508,6 +514,7 @@ func UserFromSQLNative(db *ti.Database, rows *sql.Rows) (*User, error) {
 		HolidayThemes:       userSQL.HolidayThemes,
 		Tutorials:           tutorials,
 		IsEphemeral:         userSQL.IsEphemeral,
+		ReferredBy:          userSQL.ReferredBy,
 	}
 
 	return user, nil
@@ -631,8 +638,8 @@ func (i *User) ToSQLNative() ([]*SQLInsertStatement, error) {
 	}
 
 	sqlStatements = append(sqlStatements, &SQLInsertStatement{
-		Statement: "insert ignore into users(_id, email, phone, user_status, user_name, password, bio, xp, level, tier, user_rank, coffee, first_name, last_name, gitea_id, external_auth, created_at, stripe_user, stripe_subscription, workspace_settings, encrypted_service_key, follower_count, start_user_info, highest_score, timezone, avatar_settings, broadcast_threshold, avatar_reward, stripe_account, exclusive_agreement, reset_token, has_broadcast, holiday_themes, tutorials, is_ephemeral) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
-		Values:    []interface{}{i.ID, i.Email, i.Phone, i.UserStatus, i.UserName, i.Password, i.Bio, i.XP, i.Level, i.Tier, i.Rank, i.Coffee, i.FirstName, i.LastName, i.GiteaID, i.ExternalAuth, i.CreatedAt, i.StripeUser, i.StripeSubscription, workspaceSettings, encryptedServicePassword, i.FollowerCount, startSettings, i.HighestScore, i.Timezone, avatarSettings, i.BroadcastThreshold, i.AvatarReward, i.StripeAccount, i.ExclusiveAgreement, i.ResetToken, i.HasBroadcast, i.HolidayThemes, tutorials, i.IsEphemeral},
+		Statement: "insert ignore into users(_id, email, phone, user_status, user_name, password, bio, xp, level, tier, user_rank, coffee, first_name, last_name, gitea_id, external_auth, created_at, stripe_user, stripe_subscription, workspace_settings, encrypted_service_key, follower_count, start_user_info, highest_score, timezone, avatar_settings, broadcast_threshold, avatar_reward, stripe_account, exclusive_agreement, reset_token, has_broadcast, holiday_themes, tutorials, is_ephemeral, referred_by) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+		Values:    []interface{}{i.ID, i.Email, i.Phone, i.UserStatus, i.UserName, i.Password, i.Bio, i.XP, i.Level, i.Tier, i.Rank, i.Coffee, i.FirstName, i.LastName, i.GiteaID, i.ExternalAuth, i.CreatedAt, i.StripeUser, i.StripeSubscription, workspaceSettings, encryptedServicePassword, i.FollowerCount, startSettings, i.HighestScore, i.Timezone, avatarSettings, i.BroadcastThreshold, i.AvatarReward, i.StripeAccount, i.ExclusiveAgreement, i.ResetToken, i.HasBroadcast, i.HolidayThemes, tutorials, i.IsEphemeral, i.ReferredBy},
 	})
 
 	// create insertion statement and return

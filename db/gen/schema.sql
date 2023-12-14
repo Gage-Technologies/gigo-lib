@@ -36,7 +36,8 @@ create table
         reset_token varchar(500),
         hasBroadcast boolean not null default false,
         holiday_themes boolean not null default true,
-        is_ephemeral boolean not null default false
+        is_ephemeral boolean not null default false,
+        referred_by bigint
     );
 
 create table
