@@ -523,6 +523,7 @@ func UserFromSQLNative(db *ti.Database, rows *sql.Rows) (*User, error) {
 		Tutorials:           tutorials,
 		IsEphemeral:         userSQL.IsEphemeral,
 		ReferredBy:          userSQL.ReferredBy,
+		UsedFreeTrial:       userSQL.UsedFreeTrial,
 	}
 
 	return user, nil
