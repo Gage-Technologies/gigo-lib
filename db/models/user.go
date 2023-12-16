@@ -244,7 +244,7 @@ func CreateUser(id int64, userName string, password string, email string, phone 
 
 func (i *User) EditUser(userName *string, password *string, email *string, phone *string, userStatus *UserStatus,
 	bio *string, badges []int64, savedPosts []int64, firstName *string, lasName *string, giteaID *int64,
-	externalAuth *string, starInfo *UserStart, timezone *string, avatar *AvatarSettings, broadcastThreshold *uint64) (*User, *SQLInsertStatement, error) {
+	externalAuth *string, starInfo *UserStart, timezone *string, avatar *AvatarSettings, broadcastThreshold *uint64, isEphemeral *bool) (*User, *SQLInsertStatement, error) {
 
 	params := make([]string, 0)
 	values := make([]interface{}, 0)
@@ -370,6 +370,12 @@ func (i *User) EditUser(userName *string, password *string, email *string, phone
 		i.BroadcastThreshold = *broadcastThreshold
 		params = append(params, "broadcast_threshold =?")
 		values = append(values, *broadcastThreshold)
+	}
+
+	if isEphemeral != nil {
+		i.IsEphemeral = *isEphemeral
+		params = append(params, "is_ephemeral =?")
+		values = append(values, *isEphemeral)
 	}
 
 	values = append(values, i.ID)
