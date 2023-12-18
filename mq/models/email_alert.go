@@ -12,9 +12,9 @@ func init() {
 }
 
 type NewWeekInactivityMsg struct {
-	recipient string `json:"recipient"`
+	Recipient string `json:"recipient"`
 }
 
 type NewMonthInactivityMsg struct {
-	recipient string `json:"recipient"`
+	Recipient string `json:"recipient"`
 }
