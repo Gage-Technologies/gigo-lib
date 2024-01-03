@@ -41,9 +41,12 @@ type WorkspacePool struct {
 
 	// WorkspaceID ID of the workspace that owns the volume
 	WorkspaceTableID *int64 `json:"workspace_table_id" sql:"workspace_table_id"`
+
+	// VolumeSize Size of the volume in gigabytes
+	VolumeSize int `json:"size" sql:"size"`
 }
 
-func CreateWorkspacePool(_id int64, container string, state WorkspacePoolState, memory int64, cpu int64, storage int64, secret string, workspaceTableId *int64) *WorkspacePool {
+func CreateWorkspacePool(_id int64, container string, state WorkspacePoolState, memory int64, cpu int64, storage int64, secret string, volumeSize int, workspaceTableId *int64) *WorkspacePool {
 	return &WorkspacePool{
 		ID:               _id,
 		Container:        container,
@@ -52,24 +55,25 @@ func CreateWorkspacePool(_id int64, container string, state WorkspacePoolState, 
 		CPU:              cpu,
 		Storage:          storage,
 		Secret:           secret,
+		VolumeSize:       volumeSize,
 		WorkspaceTableID: workspaceTableId,
 	}
 }
 
 func WorkspacePoolFromSqlNative(rows *sql.Rows) (*WorkspacePool, error) {
-	volume := &WorkspacePool{}
-	err := sqlstruct.Scan(volume, rows)
+	pool := &WorkspacePool{}
+	err := sqlstruct.Scan(pool, rows)
 	if err != nil {
 		return nil, fmt.Errorf("failed to scan volume: %v", err)
 	}
-	return volume, nil
+	return pool, nil
 }
 
 func (w *WorkspacePool) ToSqlNative() ([]SQLInsertStatement, error) {
 	return []SQLInsertStatement{
 		{
-			Statement: `insert into workspace_pool (_id, container, state, memory, cpu, storage, secret, workspace_table_id) values (?, ?, ?, ?, ?, ?, ?, ?)`,
-			Values:    []interface{}{w.ID, w.Container, w.State, w.Memory, w.CPU, w.Storage, w.Secret, w.WorkspaceTableID},
+			Statement: `insert into workspace_pool (_id, container, state, memory, cpu, storage, secret, volume_size, workspace_table_id) values (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+			Values:    []interface{}{w.ID, w.Container, w.State, w.Memory, w.CPU, w.Storage, w.Secret, w.VolumeSize, w.WorkspaceTableID},
 		},
 	}, nil
 }
