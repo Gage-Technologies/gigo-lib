@@ -686,3 +686,25 @@ create table
         promotional BOOLEAN NOT NULL,
         PRIMARY KEY (user_id, user_email)
     );
+
+create table
+    if not exists volpool_volume(
+        _id           bigint       not null primary key,
+        size          int          not null,
+        state         int          not null,
+        pvc_name      varchar(500) not null,
+        workspace_id  bigint       null,
+        storage_class varchar(255) null
+    );
+
+create table
+    if not exists workspace_pool(
+        _id                 bigint       not null primary key,
+        container           varchar(500) not null,
+        state               int          not null,
+        memory              bigint       not null,
+        cpu                 bigint       not null,
+        storage             bigint       not null,
+        secret              binary(16)    not null,
+        workspace_table_id  bigint       null
+);
