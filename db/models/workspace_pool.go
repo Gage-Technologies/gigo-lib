@@ -42,11 +42,14 @@ type WorkspacePool struct {
 	// WorkspaceID ID of the workspace that owns the volume
 	WorkspaceTableID *int64 `json:"workspace_table_id" sql:"workspace_table_id"`
 
+	// StorageClass Name of the storage class that owns the volume
+	StorageClass string `json:"storage_class" sql:"storage_class"`
+
 	// VolumeSize Size of the volume in gigabytes
 	VolumeSize int `json:"size" sql:"size"`
 }
 
-func CreateWorkspacePool(_id int64, container string, state WorkspacePoolState, memory int64, cpu int64, storage int64, secret string, volumeSize int, workspaceTableId *int64) *WorkspacePool {
+func CreateWorkspacePool(_id int64, container string, state WorkspacePoolState, memory int64, cpu int64, storage int64, secret string, volumeSize int, storageClass string, workspaceTableId *int64) *WorkspacePool {
 	return &WorkspacePool{
 		ID:               _id,
 		Container:        container,
@@ -56,6 +59,7 @@ func CreateWorkspacePool(_id int64, container string, state WorkspacePoolState, 
 		Storage:          storage,
 		Secret:           secret,
 		VolumeSize:       volumeSize,
+		StorageClass:     storageClass,
 		WorkspaceTableID: workspaceTableId,
 	}
 }
