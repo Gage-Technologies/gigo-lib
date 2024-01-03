@@ -20,6 +20,7 @@ type CodeSource int
 const (
 	CodeSourcePost CodeSource = iota
 	CodeSourceAttempt
+	CodeSourceByte
 )
 
 func (s CodeSource) String() string {
@@ -28,6 +29,8 @@ func (s CodeSource) String() string {
 		return "Challenge"
 	case CodeSourceAttempt:
 		return "Attempt"
+	case CodeSourceByte:
+		return "Byte"
 	}
 	return "Unknown"
 }
