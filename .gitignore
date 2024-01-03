@@ -7,3 +7,4 @@ playground
 .env
 dev/.env
 dev/volumes
+dev/data
