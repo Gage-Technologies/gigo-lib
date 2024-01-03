@@ -10,8 +10,8 @@ import (
 type WorkspacePoolState int
 
 const (
-	WorkspacePoolStateAvailable VolumeState = iota
-	WorkspacePoolStateStateInUse
+	WorkspacePoolStateAvailable WorkspacePoolState = iota
+	WorkspacePoolStateInUse
 )
 
 // Volume
