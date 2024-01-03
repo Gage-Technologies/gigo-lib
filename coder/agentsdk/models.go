@@ -105,6 +105,7 @@ type WorkspaceAgentMetadata struct {
 	Hosts              map[string]string                         `json:"hosts"`
 	ZitiID             string                                    `json:"ziti_id"`
 	ZitiToken          string                                    `json:"ziti_token"`
+	Unassigned         bool                                      `json:"unassigned"`
 }
 
 type Holiday int
