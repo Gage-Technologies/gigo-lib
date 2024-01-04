@@ -6,9 +6,8 @@ CREATE TABLE IF NOT EXISTS workspace_pool (
     `state` int not null,
     `memory` bigint not null,
     `cpu` bigint not null,
-    `storage` bigint not null,
+    `volume_size` bigint not null,
     `secret`  binary(16) not null,
-    `volume_size` int not null,
     `workspace_table_id` bigint not null
     );
 

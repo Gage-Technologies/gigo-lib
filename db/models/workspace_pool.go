@@ -33,8 +33,8 @@ type WorkspacePool struct {
 	// CPU Available CPU in cores of the workspace
 	CPU int64 `json:"cpu" sql:"cpu"`
 
-	// Storage Available storage in GB of the workspace
-	Storage int64 `json:"storage" sql:"storage"`
+	// VolumeSize Size of the volume in gigabytes
+	VolumeSize int `json:"size" sql:"size"`
 
 	// StorageClass Name of the storage class that owns the volume
 	Secret string `json:"secret" sql:"secret"`
@@ -44,21 +44,17 @@ type WorkspacePool struct {
 
 	// StorageClass Name of the storage class that owns the volume
 	StorageClass string `json:"storage_class" sql:"storage_class"`
-
-	// VolumeSize Size of the volume in gigabytes
-	VolumeSize int `json:"size" sql:"size"`
 }
 
-func CreateWorkspacePool(_id int64, container string, state WorkspacePoolState, memory int64, cpu int64, storage int64, secret string, volumeSize int, storageClass string, workspaceTableId *int64) *WorkspacePool {
+func CreateWorkspacePool(_id int64, container string, state WorkspacePoolState, memory int64, cpu int64, volumeSize int, secret string, storageClass string, workspaceTableId *int64) *WorkspacePool {
 	return &WorkspacePool{
 		ID:               _id,
 		Container:        container,
 		State:            state,
 		Memory:           memory,
 		CPU:              cpu,
-		Storage:          storage,
-		Secret:           secret,
 		VolumeSize:       volumeSize,
+		Secret:           secret,
 		StorageClass:     storageClass,
 		WorkspaceTableID: workspaceTableId,
 	}
@@ -76,8 +72,8 @@ func WorkspacePoolFromSqlNative(rows *sql.Rows) (*WorkspacePool, error) {
 func (w *WorkspacePool) ToSqlNative() ([]SQLInsertStatement, error) {
 	return []SQLInsertStatement{
 		{
-			Statement: `insert into workspace_pool (_id, container, state, memory, cpu, storage, secret, volume_size, workspace_table_id) values (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-			Values:    []interface{}{w.ID, w.Container, w.State, w.Memory, w.CPU, w.Storage, w.Secret, w.VolumeSize, w.WorkspaceTableID},
+			Statement: `insert into workspace_pool (_id, container, state, memory, cpu, volume_size, secret, workspace_table_id) values (?, ?, ?, ?, ?, ?, ?, ?)`,
+			Values:    []interface{}{w.ID, w.Container, w.State, w.Memory, w.CPU, w.VolumeSize, w.Secret, w.WorkspaceTableID},
 		},
 	}, nil
 }
