@@ -39,6 +39,9 @@ type WorkspacePool struct {
 	// StorageClass Name of the storage class that owns the volume
 	Secret string `json:"secret" sql:"secret"`
 
+	// AgentID Unique identifier of the agent that owns the workspace
+	AgentID int64 `json:"agent_id" sql:"agent_id"`
+
 	// WorkspaceID ID of the workspace that owns the volume
 	WorkspaceTableID *int64 `json:"workspace_table_id" sql:"workspace_table_id"`
 
@@ -72,8 +75,8 @@ func WorkspacePoolFromSqlNative(rows *sql.Rows) (*WorkspacePool, error) {
 func (w *WorkspacePool) ToSqlNative() ([]SQLInsertStatement, error) {
 	return []SQLInsertStatement{
 		{
-			Statement: `insert into workspace_pool (_id, container, state, memory, cpu, volume_size, secret, workspace_table_id) values (?, ?, ?, ?, ?, ?, ?, ?)`,
-			Values:    []interface{}{w.ID, w.Container, w.State, w.Memory, w.CPU, w.VolumeSize, w.Secret, w.WorkspaceTableID},
+			Statement: `insert into workspace_pool (_id, container, state, memory, cpu, volume_size, secret, agent_id, workspace_table_id) values (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+			Values:    []interface{}{w.ID, w.Container, w.State, w.Memory, w.CPU, w.VolumeSize, w.Secret, w.AgentID, w.WorkspaceTableID},
 		},
 	}, nil
 }
