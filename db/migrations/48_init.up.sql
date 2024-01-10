@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS workspace_pool (
     `secret`  binary(16) not null,
     `agent_id` bigint not null,
     `workspace_table_id` bigint not null
-    );
+);
 
 create table if not exists bytes(
     _id bigint not null primary key,

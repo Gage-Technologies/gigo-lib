@@ -75,7 +75,7 @@ func WorkspacePoolFromSqlNative(rows *sql.Rows) (*WorkspacePool, error) {
 func (w *WorkspacePool) ToSqlNative() ([]SQLInsertStatement, error) {
 	return []SQLInsertStatement{
 		{
-			Statement: `insert into workspace_pool (_id, container, state, memory, cpu, volume_size, secret, agent_id, workspace_table_id) values (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+			Statement: `insert into workspace_pool (_id, container, state, memory, cpu, volume_size, secret, agent_id, workspace_table_id) values (?, ?, ?, ?, ?, ?, uuid_to_bin(?), ?, ?)`,
 			Values:    []interface{}{w.ID, w.Container, w.State, w.Memory, w.CPU, w.VolumeSize, w.Secret, w.AgentID, w.WorkspaceTableID},
 		},
 	}, nil
