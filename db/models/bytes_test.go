@@ -7,7 +7,7 @@ import (
 )
 
 func TestCreateBytes(t *testing.T) {
-	bytes, err := CreateBytes(69420, "test", "this is a test description", "test outline for bytes", "steps 1 2 3 4")
+	bytes, err := CreateBytes(69420, "test", "this is a test description", "test outline for bytes", "steps 1 2 3 4", 5)
 	if err != nil {
 		t.Error("\nCreate Bytes Post Failed")
 		return
@@ -47,7 +47,7 @@ func TestCreateBytes(t *testing.T) {
 }
 
 func TestBytes_ToSQLNative(t *testing.T) {
-	bytes, err := CreateBytes(69420, "test", "this is a test description", "test outline for bytes", "steps 1 2 3 4")
+	bytes, err := CreateBytes(69420, "test", "this is a test description", "test outline for bytes", "steps 1 2 3 4", 5)
 	if err != nil {
 		t.Error("\nCreate Bytes Post Failed")
 		return
@@ -59,7 +59,7 @@ func TestBytes_ToSQLNative(t *testing.T) {
 		return
 	}
 
-	if statement[0].Statement != "insert ignore into bytes(_id, name, description, outline_content, dev_steps) values(?,?,?,?,?);" {
+	if statement[0].Statement != "insert ignore into bytes(_id, name, description, outline_content, dev_steps, lang) values(?,?,?,?,?,?);" {
 		t.Errorf("\nbytes to sql native failed\n    Error: incorrect statement returned")
 		return
 	}
@@ -78,7 +78,7 @@ func TestBytesFromSQLNative(t *testing.T) {
 		t.Fatalf("\n%s failed\n    Error: %v", t.Name(), err)
 	}
 
-	bytes, err := CreateBytes(69420, "test", "this is a test description", "test outline for bytes", "steps 1 2 3 4")
+	bytes, err := CreateBytes(69420, "test", "this is a test description", "test outline for bytes", "steps 1 2 3 4", 5)
 	if err != nil {
 		t.Fatalf("\n%s failed\n    Error: %v", t.Name(), err)
 	}

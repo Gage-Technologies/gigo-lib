@@ -715,7 +715,8 @@ create table
         name varchar(255) not null,
         description varchar(500) not null,
         outline_content longtext not null,
-        dev_steps longtext
+        dev_steps longtext,
+        lang int not null
     );
 create table
     if not exists byte_attempts(
