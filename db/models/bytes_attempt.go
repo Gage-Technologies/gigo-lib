@@ -12,6 +12,7 @@ type ByteAttempts struct {
 	ByteID   int64  `json:"byte_id" sql:"byte_id"`
 	AuthorID int64  `json:"author_id" sql:"author_id"`
 	Content  string `json:"content" sql:"content"`
+	Modified bool `json:"modified" sql:"modified"`
 }
 
 type ByteAttemptsSQL struct {
@@ -19,6 +20,7 @@ type ByteAttemptsSQL struct {
 	ByteID   int64  `json:"byte_id" sql:"byte_id"`
 	AuthorID int64  `json:"author_id" sql:"author_id"`
 	Content  string `json:"content" sql:"content"`
+	Modified bool `json:"modified" sql:"modified"`
 }
 
 type ByteAttemptsFrontend struct {
@@ -26,6 +28,7 @@ type ByteAttemptsFrontend struct {
 	ByteID   string `json:"byte_id" sql:"byte_id"`
 	AuthorID string `json:"author_id" sql:"author_id"`
 	Content  string `json:"content" sql:"content"`
+	Modified bool `json:"modified" sql:"modified"`
 }
 
 func CreateByteAttempts(id int64, byteID int64, authorID int64, content string) (*ByteAttempts, error) {
@@ -49,6 +52,7 @@ func ByteAttemptsFromSQLNative(rows *sql.Rows) (*ByteAttempts, error) {
 		ByteID:   byteAttemptsSQL.ByteID,
 		AuthorID: byteAttemptsSQL.AuthorID,
 		Content:  byteAttemptsSQL.Content,
+		Modified: byteAttemptsSQL.Modified,
 	}, nil
 }
 
@@ -58,6 +62,7 @@ func (b *ByteAttempts) ToFrontend() *ByteAttemptsFrontend {
 		ByteID:   fmt.Sprintf("%d", b.ByteID),
 		AuthorID: fmt.Sprintf("%d", b.AuthorID),
 		Content:  b.Content,
+		Modified: b.Modified,
 	}
 }
 
@@ -65,8 +70,8 @@ func (b *ByteAttempts) ToSQLNative() ([]*SQLInsertStatement, error) {
 	sqlStatements := make([]*SQLInsertStatement, 0)
 
 	sqlStatements = append(sqlStatements, &SQLInsertStatement{
-		Statement: "insert ignore into byte_attempts(_id, byte_id, author_id, content) values(?,?,?,?);",
-		Values:    []interface{}{b.ID, b.ByteID, b.AuthorID, b.Content},
+		Statement: "insert ignore into byte_attempts(_id, byte_id, author_id, content, modified) values(?,?,?,?,?);",
+		Values:    []interface{}{b.ID, b.ByteID, b.AuthorID, b.Content, b.Modified},
 	})
 
 	return sqlStatements, nil
