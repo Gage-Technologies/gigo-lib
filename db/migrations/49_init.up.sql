@@ -1,5 +1,5 @@
 ALTER TABLE bytes
     ADD COLUMN lang INT NOT NULL DEFAULT 5;
 
-ALTER TABLE bytes_attempt
+ALTER TABLE byte_attempts
     ADD COLUMN modified BOOLEAN NOT NULL DEFAULT FALSE;
