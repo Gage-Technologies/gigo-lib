@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+
 	"github.com/kisielk/sqlstruct"
 )
 
@@ -14,6 +15,7 @@ type Bytes struct {
 	OutlineContent string              `json:"outline_content" sql:"outline_content"`
 	DevSteps       string              `json:"dev_steps" sql:"dev_steps"`
 	Lang           ProgrammingLanguage `json:"lang" sql:"lang"`
+	Published      bool                `json:"published" sql:"published"`
 }
 
 type BytesSQL struct {
@@ -23,6 +25,7 @@ type BytesSQL struct {
 	OutlineContent string              `json:"outline_content" sql:"outline_content"`
 	DevSteps       string              `json:"dev_steps" sql:"dev_steps"`
 	Lang           ProgrammingLanguage `json:"lang" sql:"lang"`
+	Published      bool                `json:"published" sql:"published"`
 }
 
 type BytesFrontend struct {
@@ -32,6 +35,15 @@ type BytesFrontend struct {
 	OutlineContent string              `json:"outline_content" sql:"outline_content"`
 	DevSteps       string              `json:"dev_steps" sql:"dev_steps"`
 	Lang           ProgrammingLanguage `json:"lang" sql:"lang"`
+	Published      bool                `json:"published" sql:"published"`
+}
+
+type BytesSearch struct {
+	ID          int64               `json:"_id"`
+	Name        string              `json:"name"`
+	Description string              `json:"description"`
+	Lang        ProgrammingLanguage `json:"lang"`
+	Published   bool                `json:"published"`
 }
 
 func CreateBytes(id int64, name string, description string, outlineContent string, devSteps string, lang ProgrammingLanguage) (*Bytes, error) {
@@ -70,6 +82,16 @@ func (b *Bytes) ToFrontend() *BytesFrontend {
 		OutlineContent: b.OutlineContent,
 		DevSteps:       b.DevSteps,
 		Lang:           b.Lang,
+	}
+}
+
+func (b *Bytes) ToSearch() *BytesSearch {
+	return &BytesSearch{
+		ID:          b.ID,
+		Name:        b.Name,
+		Description: b.Description,
+		Lang:        b.Lang,
+		Published:   b.Published,
 	}
 }
 

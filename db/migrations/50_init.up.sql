@@ -1,0 +1,2 @@
+ALTER TABLE bytes
+    ADD COLUMN published BOOLEAN NOT NULL DEFAULT false;
