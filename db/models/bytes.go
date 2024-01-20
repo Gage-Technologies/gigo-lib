@@ -16,6 +16,7 @@ type Bytes struct {
 	DevSteps       string              `json:"dev_steps" sql:"dev_steps"`
 	Lang           ProgrammingLanguage `json:"lang" sql:"lang"`
 	Published      bool                `json:"published" sql:"published"`
+	Color          string              `json:"color" sql:"color"`
 }
 
 type BytesSQL struct {
@@ -26,6 +27,7 @@ type BytesSQL struct {
 	DevSteps       string              `json:"dev_steps" sql:"dev_steps"`
 	Lang           ProgrammingLanguage `json:"lang" sql:"lang"`
 	Published      bool                `json:"published" sql:"published"`
+	Color          string              `json:"color" sql:"color"`
 }
 
 type BytesFrontend struct {
@@ -36,6 +38,7 @@ type BytesFrontend struct {
 	DevSteps       string              `json:"dev_steps" sql:"dev_steps"`
 	Lang           ProgrammingLanguage `json:"lang" sql:"lang"`
 	Published      bool                `json:"published" sql:"published"`
+	Color          string              `json:"color" sql:"color"`
 }
 
 type BytesSearch struct {
@@ -46,7 +49,7 @@ type BytesSearch struct {
 	Published   bool                `json:"published"`
 }
 
-func CreateBytes(id int64, name string, description string, outlineContent string, devSteps string, lang ProgrammingLanguage) (*Bytes, error) {
+func CreateBytes(id int64, name string, description string, outlineContent string, devSteps string, lang ProgrammingLanguage, color string) (*Bytes, error) {
 	return &Bytes{
 		ID:             id,
 		Name:           name,
@@ -54,6 +57,7 @@ func CreateBytes(id int64, name string, description string, outlineContent strin
 		OutlineContent: outlineContent,
 		DevSteps:       devSteps,
 		Lang:           lang,
+		Color:          color,
 	}, nil
 }
 
@@ -71,6 +75,8 @@ func BytesFromSQLNative(rows *sql.Rows) (*Bytes, error) {
 		OutlineContent: bytesSQL.OutlineContent,
 		DevSteps:       bytesSQL.DevSteps,
 		Lang:           bytesSQL.Lang,
+		Published:      bytesSQL.Published,
+		Color:          bytesSQL.Color,
 	}, nil
 }
 
@@ -82,6 +88,8 @@ func (b *Bytes) ToFrontend() *BytesFrontend {
 		OutlineContent: b.OutlineContent,
 		DevSteps:       b.DevSteps,
 		Lang:           b.Lang,
+		Published:      b.Published,
+		Color:          b.Color,
 	}
 }
 
@@ -99,8 +107,8 @@ func (b *Bytes) ToSQLNative() ([]*SQLInsertStatement, error) {
 	sqlStatements := make([]*SQLInsertStatement, 0)
 
 	sqlStatements = append(sqlStatements, &SQLInsertStatement{
-		Statement: "insert ignore into bytes(_id, name, description, outline_content, dev_steps, lang) values(?,?,?,?,?,?);",
-		Values:    []interface{}{b.ID, b.Name, b.Description, b.OutlineContent, b.DevSteps, b.Lang},
+		Statement: "insert ignore into bytes(_id, name, description, outline_content, dev_steps, lang, published, color) values(?,?,?,?,?,?,?,?);",
+		Values:    []interface{}{b.ID, b.Name, b.Description, b.OutlineContent, b.DevSteps, b.Lang, b.Published, b.Color},
 	})
 
 	return sqlStatements, nil
