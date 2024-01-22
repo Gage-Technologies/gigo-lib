@@ -713,15 +713,27 @@ create table
     if not exists bytes(
         _id bigint not null primary key,
         name varchar(255) not null,
-        description varchar(500) not null,
-        outline_content longtext not null,
-        dev_steps longtext,
-        lang int not null
+        description_easy varchar(500) not null,
+        description_medium varchar(500) not null,
+        description_hard varchar(500) not null,
+        outline_content_easy longtext not null,
+        outline_content_medium longtext not null,
+        outline_content_hard longtext not null,
+        dev_steps_easy longtext,
+        dev_steps_medium longtext,
+        dev_steps_hard longtext,
+        lang int not null default 5,
+        published boolean not null default false,
+        color VARCHAR(7) NOT NULL DEFAULT '#29C18C'
     );
 create table
     if not exists byte_attempts(
         _id bigint not null primary key,
         byte_id bigint not null,
         author_id bigint not null,
-        content longtext not null
+        content_easy longtext not null,
+        content_medium longtext not null,
+        content_hard longtext not null,
+        modified BOOLEAN NOT NULL DEFAULT FALSE
+
 );
