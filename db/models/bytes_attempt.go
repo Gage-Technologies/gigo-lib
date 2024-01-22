@@ -82,7 +82,7 @@ func (b *ByteAttempts) ToSQLNative() ([]*SQLInsertStatement, error) {
 	sqlStatements := make([]*SQLInsertStatement, 0)
 
 	sqlStatements = append(sqlStatements, &SQLInsertStatement{
-		Statement: "insert ignore into byte_attempts(_id, byte_id, author_id, content, modified) values(?,?,?,?,?,?,?);",
+		Statement: "insert ignore into byte_attempts(_id, byte_id, author_id, content_easy, content_medium, content_hard, modified) values(?,?,?,?,?,?,?);",
 		Values:    []interface{}{b.ID, b.ByteID, b.AuthorID, b.ContentEasy, b.ContentMedium, b.ContentHard, b.Modified},
 	})
 
