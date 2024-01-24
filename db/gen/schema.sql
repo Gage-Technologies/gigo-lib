@@ -734,6 +734,9 @@ create table
         content_easy longtext not null,
         content_medium longtext not null,
         content_hard longtext not null,
-        modified BOOLEAN NOT NULL DEFAULT FALSE
+        modified BOOLEAN NOT NULL DEFAULT FALSE,
+        completed_easy BOOLEAN NOT NULL DEFAULT FALSE,
+        completed_medium BOOLEAN NOT NULL DEFAULT FALSE,
+        completed_hard BOOLEAN NOT NULL DEFAULT FALSE
 
 );
