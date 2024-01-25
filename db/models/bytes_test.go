@@ -28,17 +28,17 @@ func TestCreateBytes(t *testing.T) {
 		return
 	}
 
-	if bytes.Description != "this is a test description" {
+	if bytes.DescriptionEasy != "this is a test description" {
 		t.Error("\nCreate Bytes Post Failed\n    Error: wrong description")
 		return
 	}
 
-	if bytes.OutlineContent != "test outline for bytes" {
+	if bytes.OutlineContentEasy != "test outline for bytes" {
 		t.Error("\nCreate Bytes Post Failed\n    Error: wrong outline content")
 		return
 	}
 
-	if bytes.DevSteps != "steps 1 2 3 4" {
+	if bytes.DevStepsEasy != "steps 1 2 3 4" {
 		t.Error("\nCreate Bytes Post Failed\n    Error: wrong dev steps")
 		return
 	}
@@ -125,15 +125,15 @@ func TestBytesFromSQLNative(t *testing.T) {
 		t.Fatalf("\n%s failed\n    Error: wrong name", t.Name())
 	}
 
-	if b.Description != "this is a test description" {
+	if b.DescriptionEasy != "this is a test description" {
 		t.Fatalf("\n%s failed\n    Error: wrong description", t.Name())
 	}
 
-	if b.OutlineContent != "test outline for bytes" {
+	if b.OutlineContentEasy != "test outline for bytes" {
 		t.Fatalf("\n%s failed\n    Error: wrong outline content", t.Name())
 	}
 
-	if b.DevSteps != "steps 1 2 3 4" {
+	if b.DevStepsEasy != "steps 1 2 3 4" {
 		t.Fatalf("\n%s failed\n    Error: wrong dev steps", t.Name())
 	}
 
