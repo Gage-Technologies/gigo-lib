@@ -190,6 +190,16 @@ func (b *Bytes) ToSearch() *BytesSearch {
 	}
 }
 
+func (b *BytesSearch) ToFrontend() *BytesFrontend {
+	return &BytesFrontend{
+		ID:                   fmt.Sprintf("%d", b.ID),
+		Name:                 b.Name,
+		DescriptionMedium:    b.Description,
+		Lang:                 b.Lang,
+		Published:            b.Published,
+	}
+}
+
 func (b *Bytes) ToSQLNative() ([]*SQLInsertStatement, error) {
 	sqlStatements := make([]*SQLInsertStatement, 0)
 
