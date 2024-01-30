@@ -20,55 +20,27 @@ import (
 )
 
 // InitializeWorkspaceAgent fetches metadata for the currently authenticated workspace agent.
-func (c *AgentClient) InitializeWorkspaceAgent(ctx context.Context, isVnc bool) (WorkspaceAgentMetadata, error) {
+func (c *AgentClient) InitializeWorkspaceAgent(ctx context.Context, isVnc bool) (*WorkspaceAgentMetadata, error) {
 	isVNCReq := InitializeWorkspaceAgentRequest{IsVNC: isVnc}
 	res, err := c.Request(ctx, http.MethodPost, "/internal/v1/ws/initialize", isVNCReq)
 	if err != nil {
-		return WorkspaceAgentMetadata{}, err
+		return nil, err
 	}
 	defer res.Body.Close()
 	if res.StatusCode != http.StatusOK {
-		return WorkspaceAgentMetadata{}, readBodyAsError(res)
+		// we handle the 404 status code specifically because this indicates that the agent is not found
+		if res.StatusCode == http.StatusNotFound {
+			return nil, nil
+		}
+		return nil, readBodyAsError(res)
 	}
 	var agentMetadata WorkspaceAgentMetadata
 	err = json.NewDecoder(res.Body).Decode(&agentMetadata)
 	if err != nil {
-		return WorkspaceAgentMetadata{}, err
+		return nil, err
 	}
 
-	// accessingPort := c.URL.Port()
-	// if accessingPort == "" {
-	// 	accessingPort = "80"
-	// 	if c.URL.Scheme == "https" {
-	// 		accessingPort = "443"
-	// 	}
-	// }
-	// accessPort, err := strconv.Atoi(accessingPort)
-	// if err != nil {
-	// 	return WorkspaceAgentMetadata{}, xerrors.Errorf("convert accessing port %q: %w", accessingPort, err)
-	// }
-	// // Agents can provide an arbitrary access URL that may be different
-	// // that the globally configured one. This breaks the built-in DERP,
-	// // which would continue to reference the global access URL.
-	// //
-	// // This converts all built-in DERPs to use the access URL that the
-	// // metadata request was performed with.
-	// for _, region := range agentMetadata.DERPMap.Regions {
-	// 	if !region.EmbeddedRelay {
-	// 		continue
-	// 	}
-	//
-	// 	for _, node := range region.Nodes {
-	// 		if node.STUNOnly {
-	// 			continue
-	// 		}
-	// 		node.HostName = c.URL.Hostname()
-	// 		node.DERPPort = accessPort
-	// 		node.ForceHTTP = c.URL.Scheme == "http"
-	// 	}
-	// }
-
-	return agentMetadata, nil
+	return &agentMetadata, nil
 }
 
 func (c *AgentClient) ListenWorkspaceAgent(ctx context.Context) (net.Conn, error) {
