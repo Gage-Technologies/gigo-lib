@@ -6,12 +6,13 @@ import (
 )
 
 const (
-	ZitiInitConnPort        = 42069
+	ZitiAgentServerPort     = 42069
 	ZitiSSHPort             = 42070
 	ZitiReconnectingPTYPort = 42071
 	ZitiSpeedtestPort       = 42072
 	ZitiStatisticsPort      = 42073
 	ZitiSerialPort          = 42074
+	ZitiAgentLspWsPort      = 42075
 
 	// MinimumListeningPort is the minimum port that the listening-ports
 	// endpoint will return to the client, and the minimum port that is accepted
@@ -26,16 +27,35 @@ const (
 )
 
 var GigoReservedPorts = map[uint16]struct{}{
-	ZitiInitConnPort:        {},
+	ZitiAgentServerPort:     {},
 	ZitiSSHPort:             {},
 	ZitiReconnectingPTYPort: {},
 	ZitiSpeedtestPort:       {},
 	ZitiStatisticsPort:      {},
 	ZitiSerialPort:          {},
-	42075:                   {},
+	ZitiAgentLspWsPort:      {},
 	42076:                   {},
 	42077:                   {},
-	42078:                   {},
+	42079:                   {},
+	42080:                   {},
+	42081:                   {},
+	42082:                   {},
+	42083:                   {},
+	42084:                   {},
+	42085:                   {},
+	42086:                   {},
+	42088:                   {},
+	42089:                   {},
+	42090:                   {},
+	42091:                   {},
+	42092:                   {},
+	42093:                   {},
+	42094:                   {},
+	42095:                   {},
+	42096:                   {},
+	42097:                   {},
+	42098:                   {},
+	42099:                   {},
 }
 
 // IgnoredListeningPorts contains a list of ports in the global ignore list.
