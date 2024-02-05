@@ -780,3 +780,11 @@ create table if not exists journey_detour_recommendation(
     from_task_id bigint not null,
     accepted boolean not null default false
 );
+
+
+create table if not exists journey_user_map(
+    user_id bigint not null,
+    unit_id bigint not null,
+    started_at datetime not null,
+    primary key (user_id, unit_id)
+);
