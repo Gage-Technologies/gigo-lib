@@ -116,8 +116,8 @@ func (b *JourneyTask) ToFrontend() *JourneyTaskFrontend {
 func (b *JourneyTask) ToSQLNative() (*SQLInsertStatement, error) {
 
 	sqlStatements := &SQLInsertStatement{
-		Statement: "insert ignore into journey_tasks(_id, name, description, journey_unit_id, node_above, node_below, code_source_id, code_source_type, published) values(?,?,?,?,?,?,?,?,?);",
-		Values:    []interface{}{b.ID, b.Name, b.Description, b.JourneyUnitID, b.NodeAbove, b.NodeBelow, b.CodeSourceId, b.CodeSourceType, b.Published},
+		Statement: "insert ignore into journey_tasks(_id, name, description, journey_unit_id, node_above, node_below, code_source_id, code_source_type, lang, published) values(?,?,?,?,?,?,?,?,?,?);",
+		Values:    []interface{}{b.ID, b.Name, b.Description, b.JourneyUnitID, b.NodeAbove, b.NodeBelow, b.CodeSourceId, b.CodeSourceType, b.Lang, b.Published},
 	}
 
 	return sqlStatements, nil

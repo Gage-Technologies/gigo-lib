@@ -7,6 +7,7 @@ create table if not exists journey_tasks(
         `node_below` bigint,
         `code_source_id`  bigint,
         `code_source_type` int not null,
+        `lang` int not null,
         `published` boolean not null default false
 );
 
