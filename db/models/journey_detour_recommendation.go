@@ -3,7 +3,7 @@ package models
 import (
 	"database/sql"
 	"fmt"
-	"gvisor.dev/gvisor/pkg/sentry/kernel/time"
+	"time"
 
 	"github.com/kisielk/sqlstruct"
 )
