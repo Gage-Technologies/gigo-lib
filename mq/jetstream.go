@@ -199,6 +199,17 @@ func (c *JetstreamClient) init() error {
 		return fmt.Errorf("could not initialize email stream: %v", err)
 	}
 
+	// initialize db backup stream
+	err = c.initStream(
+		streams.StreamDbBackup,
+		streams.StreamSubjectsDbBackup,
+		streams.RetentionPolicyDbBackup,
+		streams.DuplicateFilterWindowDbBackup,
+	)
+	if err != nil {
+		return fmt.Errorf("could not initialize db backup stream: %v", err)
+	}
+
 	return nil
 }
 
