@@ -59,7 +59,7 @@ func JourneyUserMapFromSQLNative(ctx context.Context, span *trace.Span, tidb *ti
 
 	res, err := tidb.QueryContext(ctx, span, &callerName, fmt.Sprintf("select * from journey_units where _id in (%s)", strings.Join(paramSlots, ",")), unitIDs...)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("failed to query for full JourneyUnits inside JourneyUserMapFromSQLNative, err: %v", err))
+		return nil, errors.New(fmt.Sprintf("failed to query for full JourneyUnits inside JourneyUserMapFromSQLNative query: %v, err: %v", fmt.Sprintf("select * from journey_units where _id in (%s)", strings.Join(paramSlots, ",")), err))
 	}
 
 	defer res.Close()
