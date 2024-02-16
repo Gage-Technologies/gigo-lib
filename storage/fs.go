@@ -43,17 +43,22 @@ func CreateFileSystemStorage(root string) (*FileSystemStorage, error) {
 //
 //		 Returns:
 //		       - (io.ReadCloser): The contents of the file.
-func (s *FileSystemStorage) GetFile(path string) (io.ReadCloser, error) {
+func (s *FileSystemStorage) GetFile(path string) (io.ReadCloser, int64, error) {
+	stat, err := os.Stat(filepath.Join(s.root, path))
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to stat file: %v", err)
+	}
+
 	// open the file
 	file, err := os.Open(filepath.Join(s.root, path))
 	if err != nil {
 		if os.IsNotExist(err) {
-			return nil, nil
+			return nil, 0, nil
 		}
-		return nil, fmt.Errorf("failed to open file path: %v", err)
+		return nil, 0, fmt.Errorf("failed to open file path: %v", err)
 	}
 
-	return file, nil
+	return file, stat.Size(), nil
 }
 
 // GetFileByteRange
@@ -68,28 +73,33 @@ func (s *FileSystemStorage) GetFile(path string) (io.ReadCloser, error) {
 //
 // Returns:
 // - (io.ReadCloser): The contents of the file for the specified range, or an error.
-func (s *FileSystemStorage) GetFileByteRange(path string, offset, length int64) (io.ReadCloser, error) {
+func (s *FileSystemStorage) GetFileByteRange(path string, offset, length int64) (io.ReadCloser, int64, error) {
+	stat, err := os.Stat(filepath.Join(s.root, path))
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to stat file: %v", err)
+	}
+
 	file, err := os.Open(filepath.Join(s.root, path))
 	if err != nil {
 		if os.IsNotExist(err) {
-			return nil, nil // File does not exist
+			return nil, 0, nil // File does not exist
 		}
-		return nil, fmt.Errorf("failed to open file: %v", err)
+		return nil, 0, fmt.Errorf("failed to open file: %v", err)
 	}
 
 	// Seek to the start of the range
 	if _, err := file.Seek(offset, io.SeekStart); err != nil {
 		file.Close() // Ensure file is closed on error
-		return nil, fmt.Errorf("failed to seek file: %v", err)
+		return nil, 0, fmt.Errorf("failed to seek file: %v", err)
 	}
 
 	if length != -1 {
 		// If a specific length is requested, return a LimitedReader that reads up to 'length' bytes
-		return io.NopCloser(io.LimitReader(file, length)), nil
+		return io.NopCloser(io.LimitReader(file, length)), stat.Size(), nil
 	}
 
 	// If no specific length is requested, return the file as is, starting from 'offset'
-	return file, nil
+	return file, stat.Size(), nil
 }
 
 // CreateFile

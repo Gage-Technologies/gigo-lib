@@ -45,7 +45,7 @@ func TestFileSystemStorage_GetFile(t *testing.T) {
 
 	_ = f.Close()
 
-	file, err := storage.GetFile("get-test")
+	file, _, err := storage.GetFile("get-test")
 	if err != nil {
 		t.Fatalf("\nFileSystemStorage_GetFile failed\n    Error: %v", err)
 	}
@@ -59,7 +59,7 @@ func TestFileSystemStorage_GetFile(t *testing.T) {
 		t.Fatalf("\nFileSystemStorage_GetFile failed\n    Error: file corrupted")
 	}
 
-	file, err = storage.GetFile("get-test-no-exist")
+	file, _, err = storage.GetFile("get-test-no-exist")
 	if err != nil {
 		t.Fatalf("\nFileSystemStorage_GetFile failed\n    Error: %v", err)
 	}

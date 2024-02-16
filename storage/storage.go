@@ -15,7 +15,8 @@ type Storage interface {
 	//
 	//	 Returns:
 	//	       - (io.ReadCloser): The contents of the file.
-	GetFile(path string) (io.ReadCloser, error)
+	//         - (int64): Size of the complete file.
+	GetFile(path string) (io.ReadCloser, int64, error)
 
 	// GetFileByteRange
 	//
@@ -28,7 +29,8 @@ type Storage interface {
 	//
 	// Returns:
 	// - (io.ReadCloser): The contents of the file for the specified range, or an error.
-	GetFileByteRange(path string, offset, length int64) (io.ReadCloser, error)
+	// - (int64): Size of the complete file.
+	GetFileByteRange(path string, offset, length int64) (io.ReadCloser, int64, error)
 
 	// CreateFile
 	//

@@ -80,19 +80,23 @@ func CreateMinioObjectStorage(config config.StorageS3Config) (*MinioObjectStorag
 //
 //		 Returns:
 //		       - (io.ReadCloser): The contents of the file.
-func (s *MinioObjectStorage) GetFile(path string) (io.ReadCloser, error) {
+func (s *MinioObjectStorage) GetFile(path string) (io.ReadCloser, int64, error) {
 	exists, _, err := s.Exists(path)
 	if err != nil {
-		return nil, fmt.Errorf("check if object exists: %v", err)
+		return nil, 0, fmt.Errorf("check if object exists: %v", err)
 	}
 	if !exists {
-		return nil, nil
+		return nil, 0, nil
+	}
+	stat, err := s.client.StatObject(context.TODO(), s.config.Bucket, path, minio.StatObjectOptions{})
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to stat object: %v", err)
 	}
 	file, err := s.client.GetObject(context.TODO(), s.config.Bucket, path, minio.GetObjectOptions{})
 	if err != nil {
-		return nil, fmt.Errorf("failed to retrieve object: %v", err)
+		return nil, 0, fmt.Errorf("failed to retrieve object: %v", err)
 	}
-	return file, nil
+	return file, stat.Size, nil
 }
 
 // GetFileByteRange
@@ -107,28 +111,33 @@ func (s *MinioObjectStorage) GetFile(path string) (io.ReadCloser, error) {
 //
 // Returns:
 // - (io.ReadCloser): The contents of the file for the specified range, or an error.
-func (s *MinioObjectStorage) GetFileByteRange(path string, offset, length int64) (io.ReadCloser, error) {
+func (s *MinioObjectStorage) GetFileByteRange(path string, offset, length int64) (io.ReadCloser, int64, error) {
 	exists, _, err := s.Exists(path)
 	if err != nil {
-		return nil, fmt.Errorf("check if object exists: %v", err)
+		return nil, 0, fmt.Errorf("check if object exists: %v", err)
 	}
 	if !exists {
-		return nil, nil
+		return nil, 0, nil
+	}
+
+	stat, err := s.client.StatObject(context.TODO(), s.config.Bucket, path, minio.StatObjectOptions{})
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to stat object: %v", err)
 	}
 
 	opts := minio.GetObjectOptions{}
 	if length > 0 {
 		err := opts.SetRange(offset, offset+length-1)
 		if err != nil {
-			return nil, fmt.Errorf("failed to set range options: %v", err)
+			return nil, 0, fmt.Errorf("failed to set range options: %v", err)
 		}
 	}
 
 	file, err := s.client.GetObject(context.TODO(), s.config.Bucket, path, opts)
 	if err != nil {
-		return nil, fmt.Errorf("failed to retrieve object: %v", err)
+		return nil, 0, fmt.Errorf("failed to retrieve object: %v", err)
 	}
-	return file, nil
+	return file, stat.Size, nil
 }
 
 // CreateFile
@@ -293,7 +302,7 @@ func (s *MinioObjectStorage) MergeFiles(dst string, paths []string, smallFiles b
 	// copy small files to local temporary file
 	for _, path := range paths {
 		// get file from storage
-		file, err := s.GetFile(path)
+		file, _, err := s.GetFile(path)
 		if err != nil {
 			return fmt.Errorf("failed to get part file: %v", err)
 		}

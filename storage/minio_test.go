@@ -103,7 +103,7 @@ func TestMinioObjectStorage_GetFile(t *testing.T) {
 		t.Fatalf("\nMinioObjectStorage_GetFile failed\n    Error: %v", err)
 	}
 
-	obj, err := s.GetFile("get-test")
+	obj, _, err := s.GetFile("get-test")
 	if err != nil {
 		t.Fatalf("\nMinioObjectStorage_GetFile failed\n    Error: %v", err)
 	}
@@ -117,7 +117,7 @@ func TestMinioObjectStorage_GetFile(t *testing.T) {
 		t.Fatalf("\nMinioObjectStorage_GetFile failed\n    Error: corrupt file")
 	}
 
-	obj, err = s.GetFile("get-test-no-exist")
+	obj, _, err = s.GetFile("get-test-no-exist")
 	if err != nil {
 		t.Fatalf("\nMinioObjectStorage_GetFile failed\n    Error: %v", err)
 	}
@@ -326,7 +326,7 @@ func TestMinioObjectStorage_MergeFiles(t *testing.T) {
 		t.Fatalf("\nMinioObjectStorage_MergeFiles failed\n    Error: %v", err)
 	}
 
-	file, err := s.GetFile("merge-test-dst")
+	file, _, err := s.GetFile("merge-test-dst")
 	if err != nil {
 		t.Fatalf("\nMinioObjectStorage_MergeFiles failed\n    Error: %v", err)
 	}
@@ -378,7 +378,7 @@ func TestMinioObjectStorage_MergeFiles(t *testing.T) {
 		t.Fatalf("\nMinioObjectStorage_MergeFiles failed\n    Error: %v", err)
 	}
 
-	file, err = s.GetFile("merge-test-dst-large")
+	file, _, err = s.GetFile("merge-test-dst-large")
 	if err != nil {
 		t.Fatalf("\nMinioObjectStorage_MergeFiles failed\n    Error: %v", err)
 	}

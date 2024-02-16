@@ -45,7 +45,7 @@ func NormalizeURLForHash(uri string) (string, error) {
 //	out       - string, JWT containing the pertinent claims and signed by the global private key
 func CreateInternalJWT(storageEngine storage.Storage, service string, ip string, hours int) (string, error) {
 	// retrieve key
-	buf, err := storageEngine.GetFile("keys/private.pem")
+	buf, _, err := storageEngine.GetFile("keys/private.pem")
 	if err != nil {
 		return "", fmt.Errorf("failed to retrieve private key: %v", err)
 	}
@@ -88,7 +88,7 @@ func CreateInternalJWT(storageEngine storage.Storage, service string, ip string,
 //	out      - string, JWT containing the pertinent claims and signed by the global private key
 func CreateExternalJWT(storageEngine storage.Storage, userID string, ip string, hours int, minutes int, payload map[string]interface{}) (string, error) {
 	// retrieve key
-	buf, err := storageEngine.GetFile("keys/private.pem")
+	buf, _, err := storageEngine.GetFile("keys/private.pem")
 	if err != nil {
 		return "", fmt.Errorf("failed to retrieve private key: %v", err)
 	}
@@ -143,7 +143,7 @@ func CreateExternalJWT(storageEngine storage.Storage, userID string, ip string, 
 //	out      - string, JWT containing the pertinent claims and signed by the global private key
 func CreateExternalJWTNoIP(storageEngine storage.Storage, userID string, hours int, minutes int, payload map[string]interface{}) (string, error) {
 	// retrieve key
-	buf, err := storageEngine.GetFile("keys/private.pem")
+	buf, _, err := storageEngine.GetFile("keys/private.pem")
 	if err != nil {
 		return "", fmt.Errorf("failed to retrieve private key: %v", err)
 	}
@@ -194,7 +194,7 @@ func CreateExternalJWTNoIP(storageEngine storage.Storage, userID string, hours i
 //	out           - bool, success status for the JWT validation
 func ValidateInternalJWT(storageEngine storage.Storage, tokenString string, service string, ip string, validateIP bool) (bool, error) {
 	// retrieve key
-	buf, err := storageEngine.GetFile("keys/public.pem")
+	buf, _, err := storageEngine.GetFile("keys/public.pem")
 	if err != nil {
 		return false, fmt.Errorf("failed to retrieve public key: %v", err)
 	}
@@ -294,7 +294,7 @@ func ValidateInternalJWT(storageEngine storage.Storage, tokenString string, serv
 //	payload       - map[string]interface, payload of the jwt
 func ValidateExternalJWT(storageEngine storage.Storage, tokenString string, ip string, payload map[string]interface{}) (bool, int64, map[string]interface{}, error) {
 	// retrieve key
-	buf, err := storageEngine.GetFile("keys/public.pem")
+	buf, _, err := storageEngine.GetFile("keys/public.pem")
 	if err != nil {
 		return false, 0, nil, fmt.Errorf("failed to retrieve public key: %v", err)
 	}
