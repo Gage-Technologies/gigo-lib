@@ -34,10 +34,10 @@ func hashData(data []byte) (string, error) {
 
 func TestCreateMinioObjectStorage(t *testing.T) {
 	s, err := CreateMinioObjectStorage(config.StorageS3Config{
-		Endpoint:  "localhost:9000",
+		Endpoint:  "gigo-dev-minio:9000",
 		Bucket:    "gigo-test",
-		AccessKey: "gigo-tests",
-		SecretKey: "jDX2FrdsJpsfm64zJpy8uL7ADD7YO4bx",
+		AccessKey: "gigo-dev",
+		SecretKey: "gigo-dev",
 	})
 	if err != nil {
 		t.Fatalf("\nCreateMinioObjectStorage failed\n    Error: %v", err)
@@ -52,10 +52,10 @@ func TestCreateMinioObjectStorage(t *testing.T) {
 
 func TestMinioObjectStorage_CreateFile(t *testing.T) {
 	s, err := CreateMinioObjectStorage(config.StorageS3Config{
-		Endpoint:  "localhost:9000",
+		Endpoint:  "gigo-dev-minio:9000",
 		Bucket:    "gigo-test",
-		AccessKey: "gigo-tests",
-		SecretKey: "jDX2FrdsJpsfm64zJpy8uL7ADD7YO4bx",
+		AccessKey: "gigo-dev",
+		SecretKey: "gigo-dev",
 	})
 	if err != nil {
 		t.Fatalf("\nMinioObjectStorage_CreateFile failed\n    Error: %v", err)
@@ -87,10 +87,10 @@ func TestMinioObjectStorage_CreateFile(t *testing.T) {
 
 func TestMinioObjectStorage_GetFile(t *testing.T) {
 	s, err := CreateMinioObjectStorage(config.StorageS3Config{
-		Endpoint:  "localhost:9000",
+		Endpoint:  "gigo-dev-minio:9000",
 		Bucket:    "gigo-test",
-		AccessKey: "gigo-tests",
-		SecretKey: "jDX2FrdsJpsfm64zJpy8uL7ADD7YO4bx",
+		AccessKey: "gigo-dev",
+		SecretKey: "gigo-dev",
 	})
 	if err != nil {
 		t.Fatalf("\nMinioObjectStorage_GetFile failed\n    Error: %v", err)
@@ -126,15 +126,29 @@ func TestMinioObjectStorage_GetFile(t *testing.T) {
 		t.Fatalf("\nMinioObjectStorage_GetFile failed\n    Error: object was not nil")
 	}
 
+	obj, _, err = s.GetFileByteRange("get-test", 4, 4)
+	if err != nil {
+		t.Fatalf("\nMinioObjectStorage_GetFile failed\n    Error: %v", err)
+	}
+
+	data, err = io.ReadAll(obj)
+	if err != nil {
+		t.Fatalf("\nMinioObjectStorage_GetFile failed\n    Error: %v", err)
+	}
+
+	if string(data) != "test" {
+		t.Fatalf("\nMinioObjectStorage_GetFile failed\n    Error: corrupt file: " + string(data))
+	}
+
 	t.Log("\nMinioObjectStorage_GetFile succeeded")
 }
 
 func TestMinioObjectStorage_CreateFileStreamed(t *testing.T) {
 	s, err := CreateMinioObjectStorage(config.StorageS3Config{
-		Endpoint:  "localhost:9000",
+		Endpoint:  "gigo-dev-minio:9000",
 		Bucket:    "gigo-test",
-		AccessKey: "gigo-tests",
-		SecretKey: "jDX2FrdsJpsfm64zJpy8uL7ADD7YO4bx",
+		AccessKey: "gigo-dev",
+		SecretKey: "gigo-dev",
 	})
 	if err != nil {
 		t.Fatalf("\nMinioObjectStorage_CreateFileStreamed failed\n    Error: %v", err)
@@ -167,10 +181,10 @@ func TestMinioObjectStorage_CreateFileStreamed(t *testing.T) {
 
 func TestMinioObjectStorage_DeleteFile(t *testing.T) {
 	s, err := CreateMinioObjectStorage(config.StorageS3Config{
-		Endpoint:  "localhost:9000",
+		Endpoint:  "gigo-dev-minio:9000",
 		Bucket:    "gigo-test",
-		AccessKey: "gigo-tests",
-		SecretKey: "jDX2FrdsJpsfm64zJpy8uL7ADD7YO4bx",
+		AccessKey: "gigo-dev",
+		SecretKey: "gigo-dev",
 	})
 	if err != nil {
 		t.Fatalf("\nMinioObjectStorage_DeleteFile failed\n    Error: %v", err)
@@ -202,10 +216,10 @@ func TestMinioObjectStorage_DeleteFile(t *testing.T) {
 
 func TestMinioObjectStorage_MoveFile(t *testing.T) {
 	s, err := CreateMinioObjectStorage(config.StorageS3Config{
-		Endpoint:  "localhost:9000",
+		Endpoint:  "gigo-dev-minio:9000",
 		Bucket:    "gigo-test",
-		AccessKey: "gigo-tests",
-		SecretKey: "jDX2FrdsJpsfm64zJpy8uL7ADD7YO4bx",
+		AccessKey: "gigo-dev",
+		SecretKey: "gigo-dev",
 	})
 	if err != nil {
 		t.Fatalf("\nMinioObjectStorage_MoveFile failed\n    Error: %v", err)
@@ -252,10 +266,10 @@ func TestMinioObjectStorage_MoveFile(t *testing.T) {
 
 func TestMinioObjectStorage_CopyFile(t *testing.T) {
 	s, err := CreateMinioObjectStorage(config.StorageS3Config{
-		Endpoint:  "localhost:9000",
+		Endpoint:  "gigo-dev-minio:9000",
 		Bucket:    "gigo-test",
-		AccessKey: "gigo-tests",
-		SecretKey: "jDX2FrdsJpsfm64zJpy8uL7ADD7YO4bx",
+		AccessKey: "gigo-dev",
+		SecretKey: "gigo-dev",
 	})
 	if err != nil {
 		t.Fatalf("\nMinioObjectStorage_CopyFile failed\n    Error: %v", err)
@@ -293,10 +307,10 @@ func TestMinioObjectStorage_CopyFile(t *testing.T) {
 
 func TestMinioObjectStorage_MergeFiles(t *testing.T) {
 	s, err := CreateMinioObjectStorage(config.StorageS3Config{
-		Endpoint:  "localhost:9000",
+		Endpoint:  "gigo-dev-minio:9000",
 		Bucket:    "gigo-test",
-		AccessKey: "gigo-tests",
-		SecretKey: "jDX2FrdsJpsfm64zJpy8uL7ADD7YO4bx",
+		AccessKey: "gigo-dev",
+		SecretKey: "gigo-dev",
 	})
 	if err != nil {
 		t.Fatalf("\nMinioObjectStorage_MergeFiles failed\n    Error: %v", err)
@@ -402,10 +416,10 @@ func TestMinioObjectStorage_MergeFiles(t *testing.T) {
 
 func TestMinioObjectStorage_Exists(t *testing.T) {
 	s, err := CreateMinioObjectStorage(config.StorageS3Config{
-		Endpoint:  "localhost:9000",
+		Endpoint:  "gigo-dev-minio:9000",
 		Bucket:    "gigo-test",
-		AccessKey: "gigo-tests",
-		SecretKey: "jDX2FrdsJpsfm64zJpy8uL7ADD7YO4bx",
+		AccessKey: "gigo-dev",
+		SecretKey: "gigo-dev",
 	})
 	if err != nil {
 		t.Fatalf("\nMinioObjectStorage_Exists failed\n    Error: %v", err)
@@ -446,10 +460,10 @@ func TestMinioObjectStorage_Exists(t *testing.T) {
 
 func TestMinioObjectStorage_ListDir(t *testing.T) {
 	s, err := CreateMinioObjectStorage(config.StorageS3Config{
-		Endpoint:  "localhost:9000",
+		Endpoint:  "gigo-dev-minio:9000",
 		Bucket:    "gigo-test",
-		AccessKey: "gigo-tests",
-		SecretKey: "jDX2FrdsJpsfm64zJpy8uL7ADD7YO4bx",
+		AccessKey: "gigo-dev",
+		SecretKey: "gigo-dev",
 	})
 	if err != nil {
 		t.Fatalf("\nMinioObjectStorage_ListDir failed\n    Error: %v", err)
@@ -513,10 +527,10 @@ func TestMinioObjectStorage_ListDir(t *testing.T) {
 
 func TestMinioObjectStorage_DeleteDir(t *testing.T) {
 	s, err := CreateMinioObjectStorage(config.StorageS3Config{
-		Endpoint:  "localhost:9000",
+		Endpoint:  "gigo-dev-minio:9000",
 		Bucket:    "gigo-test",
-		AccessKey: "gigo-tests",
-		SecretKey: "jDX2FrdsJpsfm64zJpy8uL7ADD7YO4bx",
+		AccessKey: "gigo-dev",
+		SecretKey: "gigo-dev",
 	})
 	if err != nil {
 		t.Fatalf("\nMinioObjectStorage_DeleteDir failed\n    Error: %v", err)
