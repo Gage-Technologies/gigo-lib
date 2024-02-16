@@ -95,6 +95,42 @@ func (s *MinioObjectStorage) GetFile(path string) (io.ReadCloser, error) {
 	return file, nil
 }
 
+// GetFileByteRange
+//
+//			Returns a file from the configured bucket with respect for the Byte range
+//	     Returns nil if the file does not exist.
+//
+// Args:
+// - path (string): The path of the file to retrieve.
+// - offset (int64): The starting byte of the file to read from.
+// - length (int64): The number of bytes to read starting from `offset`. If -1, until the end of the file.
+//
+// Returns:
+// - (io.ReadCloser): The contents of the file for the specified range, or an error.
+func (s *MinioObjectStorage) GetFileByteRange(path string, offset, length int64) (io.ReadCloser, error) {
+	exists, _, err := s.Exists(path)
+	if err != nil {
+		return nil, fmt.Errorf("check if object exists: %v", err)
+	}
+	if !exists {
+		return nil, nil
+	}
+
+	opts := minio.GetObjectOptions{}
+	if length > 0 {
+		err := opts.SetRange(offset, offset+length-1)
+		if err != nil {
+			return nil, fmt.Errorf("failed to set range options: %v", err)
+		}
+	}
+
+	file, err := s.client.GetObject(context.TODO(), s.config.Bucket, path, opts)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve object: %v", err)
+	}
+	return file, nil
+}
+
 // CreateFile
 //
 //	Creates a new file in the configured bucket.

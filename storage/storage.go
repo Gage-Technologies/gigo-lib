@@ -17,6 +17,19 @@ type Storage interface {
 	//	       - (io.ReadCloser): The contents of the file.
 	GetFile(path string) (io.ReadCloser, error)
 
+	// GetFileByteRange
+	//
+	//		Returns a file from the configured bucket with respect for the Byte range
+	//	     Returns nil if the file does not exist.
+	// Args:
+	// - path (string): The path of the file to retrieve.
+	// - offset (int64): The starting byte of the file to read from.
+	// - length (int64): The number of bytes to read starting from `offset`. If -1, until the end of the file.
+	//
+	// Returns:
+	// - (io.ReadCloser): The contents of the file for the specified range, or an error.
+	GetFileByteRange(path string, offset, length int64) (io.ReadCloser, error)
+
 	// CreateFile
 	//
 	//	Creates a new file in the configured bucket.

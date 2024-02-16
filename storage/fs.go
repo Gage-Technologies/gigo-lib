@@ -56,6 +56,42 @@ func (s *FileSystemStorage) GetFile(path string) (io.ReadCloser, error) {
 	return file, nil
 }
 
+// GetFileByteRange
+//
+//			Returns a file from the configured bucket with respect for the configured byte range
+//	     Returns nil if the file does not exist.
+//
+// Args:
+// - path (string): The path of the file to retrieve.
+// - offset (int64): The starting byte of the file to read from.
+// - length (int64): The number of bytes to read starting from `offset`. If -1, until the end of the file.
+//
+// Returns:
+// - (io.ReadCloser): The contents of the file for the specified range, or an error.
+func (s *FileSystemStorage) GetFileByteRange(path string, offset, length int64) (io.ReadCloser, error) {
+	file, err := os.Open(filepath.Join(s.root, path))
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, nil // File does not exist
+		}
+		return nil, fmt.Errorf("failed to open file: %v", err)
+	}
+
+	// Seek to the start of the range
+	if _, err := file.Seek(offset, io.SeekStart); err != nil {
+		file.Close() // Ensure file is closed on error
+		return nil, fmt.Errorf("failed to seek file: %v", err)
+	}
+
+	if length != -1 {
+		// If a specific length is requested, return a LimitedReader that reads up to 'length' bytes
+		return io.NopCloser(io.LimitReader(file, length)), nil
+	}
+
+	// If no specific length is requested, return the file as is, starting from 'offset'
+	return file, nil
+}
+
 // CreateFile
 //
 //	Creates a new file in the configured bucket.
