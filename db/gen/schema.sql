@@ -789,3 +789,10 @@ create table if not exists journey_user_map(
     started_at datetime not null,
     primary key (user_id, unit_id)
 );
+
+
+CREATE TABLE IF NOT EXISTS journey_unit_tags(
+    unit_id BIGINT NOT NULL,
+    value varchar(256) NOT NULL,
+    primary key (unit_id, value)
+);
