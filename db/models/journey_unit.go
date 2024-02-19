@@ -152,7 +152,7 @@ func (b *JourneyUnit) ToSQLNative() ([]*SQLInsertStatement, error) {
 	}
 
 	sqlStatements = append(sqlStatements, &SQLInsertStatement{
-		Statement: "insert ignore into journey_units(_id, name, description, unit_above, unit_below, langs, published, color) values(?,?,?,?,?,?);",
+		Statement: "insert ignore into journey_units(_id, name, description, unit_above, unit_below, langs, published, color) values(?,?,?,?,?,?,?,?);",
 		Values:    []interface{}{b.ID, b.Name, b.Description, b.UnitAbove, b.UnitBelow, bytes, b.Published, b.Color},
 	})
 
