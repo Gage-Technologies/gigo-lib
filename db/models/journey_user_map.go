@@ -20,7 +20,7 @@ type JourneyUserMap struct {
 
 type JourneyUserMapSQL struct {
 	UserID      int64     `json:"user_id" sql:"user_id"`
-	Unit        int64     `json:"unit" sql:"unit"`
+	Unit        int64     `json:"unit_id" sql:"unit_id"`
 	DateStarted time.Time `json:"date_started" sql:"date_started"`
 }
 
