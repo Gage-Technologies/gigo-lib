@@ -47,7 +47,7 @@ func JourneyUserMapFromSQLNative(ctx context.Context, span *trace.Span, tidb *ti
 		tempJ := new(JourneyUserMapSQL)
 		err := sqlstruct.Scan(tempJ, rows)
 		if err != nil {
-			return nil, fmt.Errorf("error scanning JourneyUserMap info in first scan: %v", err)
+			return nil, errors.New(fmt.Sprintf("error scanning JourneyUserMap info in first scan: %v", err))
 		}
 
 		unitIDs = append(unitIDs, tempJ.Unit)
@@ -72,7 +72,13 @@ func JourneyUserMapFromSQLNative(ctx context.Context, span *trace.Span, tidb *ti
 
 		if j != nil {
 			journeyUnits = append(journeyUnits, *j)
+		} else {
+			return nil, errors.New(fmt.Sprintf("journey unit is null from SQL native in JourneyUserMapFromSQLNative"))
 		}
+	}
+
+	if len(journeyUnits) < 1 {
+		return nil, errors.New(fmt.Sprintf("no units returned from user map with query: %v and params: %v", fmt.Sprintf("select * from journey_units where _id in (%s)", strings.Join(paramSlots, ",")), unitIDs))
 	}
 
 	return &JourneyUserMap{
