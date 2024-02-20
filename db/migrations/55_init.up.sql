@@ -47,5 +47,6 @@ CREATE TABLE IF NOT EXISTS journey_detour_recommendation(
 CREATE TABLE IF NOT EXISTS journey_user_map(
            user_id BIGINT NOT NULL,
            unit_id BIGINT NOT NULL,
-           started_at DATETIME NOT NULL
+           started_at DATETIME NOT NULL,
+           primary key (user_id, unit_id)
 );
