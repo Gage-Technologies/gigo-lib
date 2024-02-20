@@ -70,6 +70,10 @@ func JourneyUnitFromSQLNative(ctx context.Context, span *trace.Span, tidb *ti.Da
 		return nil, errors.New(fmt.Sprintf("failed to marshal rows into JourneyUnitSQL, err: %v", err))
 	}
 
+	if JourneyUnitSQL == nil {
+		return nil, errors.New(fmt.Sprintf("failed to scan journey unit inisde JourneyUnitFromSQLNative, err: %v", err))
+	}
+
 	// create empty variable to hold workspace ports data
 	var langs []ProgrammingLanguage
 
