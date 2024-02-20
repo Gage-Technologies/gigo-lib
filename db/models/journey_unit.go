@@ -30,7 +30,7 @@ type JourneyUnitSQL struct {
 	UnitAbove   *int64   `json:"unit_above" sql:"unit_above"`
 	UnitBelow   *int64   `json:"unit_below" sql:"unit_below"`
 	Description string   `json:"description" sql:"description"`
-	Langs       []uint8  `json:"langs" sql:"langs"`
+	Langs       []byte   `json:"langs" sql:"langs"`
 	Tags        []string `json:"tags" sql:"tags"`
 	Published   bool     `json:"published" sql:"published"`
 	Color       string   `json:"color" sql:"color"`
@@ -70,10 +70,15 @@ func JourneyUnitFromSQLNative(ctx context.Context, span *trace.Span, tidb *ti.Da
 		return nil, errors.New(fmt.Sprintf("failed to marshal rows into JourneyUnitSQL, err: %v", err))
 	}
 
-	langs := make([]ProgrammingLanguage, 0)
+	// create empty variable to hold workspace ports data
+	var langs []ProgrammingLanguage
 
-	for _, l := range JourneyUnitSQL.Langs {
-		langs = append(langs, ProgrammingLanguage(int(l)))
+	// conditionally unmarshall json for workspace settings
+	if JourneyUnitSQL.Langs != nil {
+		err = json.Unmarshal(JourneyUnitSQL.Langs, &langs)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshall langs: %v", err)
+		}
 	}
 
 	jUnit := JourneyUnit{
