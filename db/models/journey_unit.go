@@ -108,6 +108,7 @@ func JourneyUnitFromSQLNative(ctx context.Context, span *trace.Span, tidb *ti.Da
 		if err != nil {
 			return nil, errors.New(fmt.Sprintf("failed to marshal tag rows into JourneyUnitSQL, err: %v", err))
 		}
+		tags = append(tags, tag)
 	}
 
 	jUnit.Tags = tags
