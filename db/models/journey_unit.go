@@ -25,15 +25,15 @@ type JourneyUnit struct {
 }
 
 type JourneyUnitSQL struct {
-	ID          int64                 `json:"_id" sql:"_id"`
-	Name        string                `json:"name" sql:"name"`
-	UnitAbove   *int64                `json:"unit_above" sql:"unit_above"`
-	UnitBelow   *int64                `json:"unit_below" sql:"unit_below"`
-	Description string                `json:"description" sql:"description"`
-	Langs       []ProgrammingLanguage `json:"langs" sql:"langs"`
-	Tags        []string              `json:"tags" sql:"tags"`
-	Published   bool                  `json:"published" sql:"published"`
-	Color       string                `json:"color" sql:"color"`
+	ID          int64    `json:"_id" sql:"_id"`
+	Name        string   `json:"name" sql:"name"`
+	UnitAbove   *int64   `json:"unit_above" sql:"unit_above"`
+	UnitBelow   *int64   `json:"unit_below" sql:"unit_below"`
+	Description string   `json:"description" sql:"description"`
+	Langs       []uint8  `json:"langs" sql:"langs"`
+	Tags        []string `json:"tags" sql:"tags"`
+	Published   bool     `json:"published" sql:"published"`
+	Color       string   `json:"color" sql:"color"`
 }
 
 type JourneyUnitFrontend struct {
@@ -70,13 +70,19 @@ func JourneyUnitFromSQLNative(ctx context.Context, span *trace.Span, tidb *ti.Da
 		return nil, errors.New(fmt.Sprintf("failed to marshal rows into JourneyUnitSQL, err: %v", err))
 	}
 
+	langs := make([]ProgrammingLanguage, 0)
+
+	for _, l := range JourneyUnitSQL.Langs {
+		langs = append(langs, ProgrammingLanguage(int(l)))
+	}
+
 	jUnit := JourneyUnit{
 		ID:          JourneyUnitSQL.ID,
 		Name:        JourneyUnitSQL.Name,
 		UnitAbove:   JourneyUnitSQL.UnitAbove,
 		UnitBelow:   JourneyUnitSQL.UnitBelow,
 		Description: JourneyUnitSQL.Description,
-		Langs:       JourneyUnitSQL.Langs,
+		Langs:       langs,
 		Published:   JourneyUnitSQL.Published,
 		Color:       JourneyUnitSQL.Color,
 	}
