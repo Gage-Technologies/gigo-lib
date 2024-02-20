@@ -34,16 +34,16 @@ type JourneyTaskSQL struct {
 }
 
 type JourneyTaskFrontend struct {
-	ID             string              `json:"_id" sql:"_id"`
-	Name           string              `json:"name" sql:"name"`
-	Description    string              `json:"description" sql:"description"`
-	JourneyUnitID  string              `json:"journey_id" sql:"journey_id"`
-	NodeAbove      *string             `json:"node_above" sql:"node_above"`
-	NodeBelow      *string             `json:"node_below" sql:"node_below"`
-	CodeSourceId   string              `json:"code_source_id" sql:"code_source_id"`
-	CodeSourceType CodeSource          `json:"code_source" sql:"code_source"`
-	Lang           ProgrammingLanguage `json:"lang" sql:"lang"`
-	Published      bool                `json:"published" sql:"published"`
+	ID             string  `json:"_id" sql:"_id"`
+	Name           string  `json:"name" sql:"name"`
+	Description    string  `json:"description" sql:"description"`
+	JourneyUnitID  string  `json:"journey_id" sql:"journey_id"`
+	NodeAbove      *string `json:"node_above" sql:"node_above"`
+	NodeBelow      *string `json:"node_below" sql:"node_below"`
+	CodeSourceId   string  `json:"code_source_id" sql:"code_source_id"`
+	CodeSourceType string  `json:"code_source" sql:"code_source"`
+	Lang           string  `json:"lang" sql:"lang"`
+	Published      bool    `json:"published" sql:"published"`
 }
 
 func CreateJourneyTask(id int64, name string, description string, journeyUnitID int64, nodeAbove *int64,
@@ -107,8 +107,8 @@ func (b *JourneyTask) ToFrontend() *JourneyTaskFrontend {
 		NodeAbove:      nodeAbove,
 		NodeBelow:      nodeBelow,
 		CodeSourceId:   fmt.Sprintf("%v", b.CodeSourceId),
-		CodeSourceType: b.CodeSourceType,
-		Lang:           b.Lang,
+		CodeSourceType: b.CodeSourceType.String(),
+		Lang:           b.Lang.String(),
 		Published:      b.Published,
 	}
 }

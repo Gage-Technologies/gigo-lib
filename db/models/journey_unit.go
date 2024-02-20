@@ -37,15 +37,15 @@ type JourneyUnitSQL struct {
 }
 
 type JourneyUnitFrontend struct {
-	ID          string                `json:"_id" sql:"_id"`
-	Name        string                `json:"name" sql:"name"`
-	UnitAbove   *string               `json:"unit_above" sql:"unit_above"`
-	UnitBelow   *string               `json:"unit_below" sql:"unit_below"`
-	Description string                `json:"description" sql:"description"`
-	Langs       []ProgrammingLanguage `json:"langs" sql:"langs"`
-	Tags        []string              `json:"tags" sql:"tags"`
-	Published   bool                  `json:"published" sql:"published"`
-	Color       string                `json:"color" sql:"color"`
+	ID          string   `json:"_id" sql:"_id"`
+	Name        string   `json:"name" sql:"name"`
+	UnitAbove   *string  `json:"unit_above" sql:"unit_above"`
+	UnitBelow   *string  `json:"unit_below" sql:"unit_below"`
+	Description string   `json:"description" sql:"description"`
+	Langs       []string `json:"langs" sql:"langs"`
+	Tags        []string `json:"tags" sql:"tags"`
+	Published   bool     `json:"published" sql:"published"`
+	Color       string   `json:"color" sql:"color"`
 }
 
 func CreateJourneyUnit(id int64, name string, unitAbove *int64, unitBelow *int64,
@@ -125,6 +125,12 @@ func (b *JourneyUnit) ToFrontend() *JourneyUnitFrontend {
 		unitBelow = &unitStr
 	}
 
+	langs := make([]string, 0)
+
+	for _, l := range b.Langs {
+		langs = append(langs, l.String())
+	}
+
 	return &JourneyUnitFrontend{
 		ID:          fmt.Sprintf("%d", b.ID),
 		Name:        b.Name,
@@ -132,7 +138,7 @@ func (b *JourneyUnit) ToFrontend() *JourneyUnitFrontend {
 		UnitAbove:   unitAbove,
 		UnitBelow:   unitBelow,
 		Tags:        b.Tags,
-		Langs:       b.Langs,
+		Langs:       langs,
 		Published:   b.Published,
 		Color:       b.Color,
 	}

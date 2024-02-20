@@ -25,8 +25,8 @@ type JourneyUserMapSQL struct {
 }
 
 type JourneyUserMapFrontend struct {
-	UserID string        `json:"user_id" sql:"user_id"`
-	Units  []JourneyUnit `json:"units" sql:"units"`
+	UserID string                 `json:"user_id" sql:"user_id"`
+	Units  []*JourneyUnitFrontend `json:"units" sql:"units"`
 }
 
 func CreateJourneyUserMap(userId int64, units []JourneyUnit) (*JourneyUserMap, error) {
@@ -82,9 +82,16 @@ func JourneyUserMapFromSQLNative(ctx context.Context, span *trace.Span, tidb *ti
 }
 
 func (b *JourneyUserMap) ToFrontend() *JourneyUserMapFrontend {
+
+	units := make([]*JourneyUnitFrontend, 0)
+
+	for _, u := range b.Units {
+		units = append(units, u.ToFrontend())
+	}
+
 	return &JourneyUserMapFrontend{
 		UserID: fmt.Sprintf("%d", b.UserID),
-		Units:  b.Units,
+		Units:  units,
 	}
 }
 
