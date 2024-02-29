@@ -21,6 +21,7 @@ const (
 	CodeSourcePost CodeSource = iota
 	CodeSourceAttempt
 	CodeSourceByte
+	CodeSourceHH
 )
 
 func (s CodeSource) String() string {
@@ -31,6 +32,8 @@ func (s CodeSource) String() string {
 		return "Attempt"
 	case CodeSourceByte:
 		return "Byte"
+	case CodeSourceHH:
+		return "HomeworkHelp"
 	}
 	return "Unknown"
 }
