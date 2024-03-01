@@ -99,7 +99,8 @@ type User struct {
 	UsedFreeTrial      bool    `json:"used_free_trial" sql:"used_free_trial"`
 	FollowerCount      uint64  `json:"follower_count" sql:"follower_count"`
 
-	ReferredBy *int64 `json:"referred_by" sql:"referred_by"`
+	ReferredBy     *int64 `json:"referred_by" sql:"referred_by"`
+	ByteHelpMobile bool   `json:"byte_help_mobile" sql:"byte_help_mobile"`
 }
 
 type UserSQL struct {
@@ -147,7 +148,8 @@ type UserSQL struct {
 	UsedFreeTrial      bool    `json:"used_free_trial" sql:"used_free_trial"`
 	FollowerCount      uint64  `json:"follower_count" sql:"follower_count"`
 
-	ReferredBy *int64 `json:"referred_by" sql:"referred_by"`
+	ReferredBy     *int64 `json:"referred_by" sql:"referred_by"`
+	ByteHelpMobile bool   `json:"byte_help_mobile" sql:"byte_help_mobile"`
 }
 
 type UserSearch struct {
@@ -241,6 +243,7 @@ func CreateUser(id int64, userName string, password string, email string, phone 
 		HolidayThemes:       true,
 		Tutorials:           &DefaultUserTutorial,
 		ReferredBy:          referredBy,
+		ByteHelpMobile:      false,
 	}, nil
 }
 
@@ -524,6 +527,7 @@ func UserFromSQLNative(db *ti.Database, rows *sql.Rows) (*User, error) {
 		IsEphemeral:         userSQL.IsEphemeral,
 		ReferredBy:          userSQL.ReferredBy,
 		UsedFreeTrial:       userSQL.UsedFreeTrial,
+		ByteHelpMobile:      userSQL.ByteHelpMobile,
 	}
 
 	return user, nil
@@ -647,8 +651,8 @@ func (i *User) ToSQLNative() ([]*SQLInsertStatement, error) {
 	}
 
 	sqlStatements = append(sqlStatements, &SQLInsertStatement{
-		Statement: "insert ignore into users(_id, email, phone, user_status, user_name, password, bio, xp, level, tier, user_rank, coffee, first_name, last_name, gitea_id, external_auth, created_at, stripe_user, stripe_subscription, workspace_settings, encrypted_service_key, follower_count, start_user_info, highest_score, timezone, avatar_settings, broadcast_threshold, avatar_reward, stripe_account, exclusive_agreement, reset_token, has_broadcast, holiday_themes, tutorials, is_ephemeral, referred_by, used_free_trial) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
-		Values:    []interface{}{i.ID, i.Email, i.Phone, i.UserStatus, i.UserName, i.Password, i.Bio, i.XP, i.Level, i.Tier, i.Rank, i.Coffee, i.FirstName, i.LastName, i.GiteaID, i.ExternalAuth, i.CreatedAt, i.StripeUser, i.StripeSubscription, workspaceSettings, encryptedServicePassword, i.FollowerCount, startSettings, i.HighestScore, i.Timezone, avatarSettings, i.BroadcastThreshold, i.AvatarReward, i.StripeAccount, i.ExclusiveAgreement, i.ResetToken, i.HasBroadcast, i.HolidayThemes, tutorials, i.IsEphemeral, i.ReferredBy, i.UsedFreeTrial},
+		Statement: "insert ignore into users(_id, email, phone, user_status, user_name, password, bio, xp, level, tier, user_rank, coffee, first_name, last_name, gitea_id, external_auth, created_at, stripe_user, stripe_subscription, workspace_settings, encrypted_service_key, follower_count, start_user_info, highest_score, timezone, avatar_settings, broadcast_threshold, avatar_reward, stripe_account, exclusive_agreement, reset_token, has_broadcast, holiday_themes, tutorials, is_ephemeral, referred_by, used_free_trial, byte_help_mobile) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+		Values:    []interface{}{i.ID, i.Email, i.Phone, i.UserStatus, i.UserName, i.Password, i.Bio, i.XP, i.Level, i.Tier, i.Rank, i.Coffee, i.FirstName, i.LastName, i.GiteaID, i.ExternalAuth, i.CreatedAt, i.StripeUser, i.StripeSubscription, workspaceSettings, encryptedServicePassword, i.FollowerCount, startSettings, i.HighestScore, i.Timezone, avatarSettings, i.BroadcastThreshold, i.AvatarReward, i.StripeAccount, i.ExclusiveAgreement, i.ResetToken, i.HasBroadcast, i.HolidayThemes, tutorials, i.IsEphemeral, i.ReferredBy, i.UsedFreeTrial, i.ByteHelpMobile},
 	})
 
 	// create insertion statement and return

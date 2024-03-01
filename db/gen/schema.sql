@@ -37,7 +37,8 @@ create table
         hasBroadcast boolean not null default false,
         holiday_themes boolean not null default true,
         is_ephemeral boolean not null default false,
-        referred_by bigint
+        referred_by bigint,
+        byte_help_mobile boolean not null default false
     );
 
 create table
