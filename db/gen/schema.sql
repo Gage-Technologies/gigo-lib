@@ -38,7 +38,7 @@ create table
         holiday_themes boolean not null default true,
         is_ephemeral boolean not null default false,
         referred_by bigint,
-        byte_help_mobile boolean not null default false
+        byte_help_mobile boolean not null default true
     );
 
 create table

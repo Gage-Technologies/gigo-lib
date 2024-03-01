@@ -243,7 +243,7 @@ func CreateUser(id int64, userName string, password string, email string, phone 
 		HolidayThemes:       true,
 		Tutorials:           &DefaultUserTutorial,
 		ReferredBy:          referredBy,
-		ByteHelpMobile:      false,
+		ByteHelpMobile:      true,
 	}, nil
 }
 
