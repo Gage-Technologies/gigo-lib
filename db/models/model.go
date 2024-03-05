@@ -283,6 +283,7 @@ const (
 	Cobol
 	Lisp
 	HCL
+	Bash
 )
 
 func (l ProgrammingLanguage) String() string {
@@ -363,6 +364,8 @@ func (l ProgrammingLanguage) String() string {
 		return "Lisp"
 	case HCL:
 		return "HCL"
+	case Bash:
+		return "Bash"
 	default:
 		return "Unknown"
 	}
