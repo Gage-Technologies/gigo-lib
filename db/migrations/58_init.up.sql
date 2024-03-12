@@ -1,0 +1,1 @@
+ALTER TABLE journey_units ADD COLUMN handout longtext NOT NULL DEFAULT '';

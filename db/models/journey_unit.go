@@ -22,6 +22,7 @@ type JourneyUnit struct {
 	Tags        []string              `json:"tags" sql:"tags"`
 	Published   bool                  `json:"published" sql:"published"`
 	Color       string                `json:"color" sql:"color"`
+	Handout     string                `json:"handout" sql:"handout"`
 }
 
 type JourneyUnitSQL struct {
@@ -34,6 +35,7 @@ type JourneyUnitSQL struct {
 	Tags        []string `json:"tags" sql:"tags"`
 	Published   bool     `json:"published" sql:"published"`
 	Color       string   `json:"color" sql:"color"`
+	Handout     string   `json:"handout" sql:"handout"`
 }
 
 type JourneyUnitFrontend struct {
@@ -46,10 +48,11 @@ type JourneyUnitFrontend struct {
 	Tags        []string `json:"tags" sql:"tags"`
 	Published   bool     `json:"published" sql:"published"`
 	Color       string   `json:"color" sql:"color"`
+	Handout     string   `json:"handout" sql:"handout"`
 }
 
 func CreateJourneyUnit(id int64, name string, unitAbove *int64, unitBelow *int64,
-	description string, langs []ProgrammingLanguage, tags []string, published bool, color string) (*JourneyUnit, error) {
+	description string, langs []ProgrammingLanguage, tags []string, published bool, color string, handout string) (*JourneyUnit, error) {
 	return &JourneyUnit{
 		ID:          id,
 		Name:        name,
@@ -60,6 +63,7 @@ func CreateJourneyUnit(id int64, name string, unitAbove *int64, unitBelow *int64
 		Tags:        tags,
 		Published:   published,
 		Color:       color,
+		Handout:     handout,
 	}, nil
 }
 
@@ -94,6 +98,7 @@ func JourneyUnitFromSQLNative(ctx context.Context, span *trace.Span, tidb *ti.Da
 		Langs:       langs,
 		Published:   JourneyUnitSQL.Published,
 		Color:       JourneyUnitSQL.Color,
+		Handout:     JourneyUnitSQL.Handout,
 	}
 
 	callerName := "JourneyUnitFromSQLNative"
@@ -151,6 +156,7 @@ func (b *JourneyUnit) ToFrontend() *JourneyUnitFrontend {
 		Langs:       langs,
 		Published:   b.Published,
 		Color:       b.Color,
+		Handout:     b.Handout,
 	}
 }
 
@@ -174,7 +180,7 @@ func (b *JourneyUnit) ToSQLNative() ([]*SQLInsertStatement, error) {
 	}
 
 	sqlStatements = append(sqlStatements, &SQLInsertStatement{
-		Statement: "insert ignore into journey_units(_id, name, description, unit_above, unit_below, langs, published, color) values(?,?,?,?,?,?,?,?);",
+		Statement: "insert ignore into journey_units(_id, name, description, unit_above, unit_below, langs, published, color, handout) values(?,?,?,?,?,?,?,?,?);",
 		Values:    []interface{}{b.ID, b.Name, b.Description, b.UnitAbove, b.UnitBelow, bytes, b.Published, b.Color},
 	})
 

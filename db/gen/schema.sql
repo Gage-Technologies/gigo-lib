@@ -763,7 +763,8 @@ create table if not exists journey_units(
     unit_below bigint,
     langs json not null,
     published boolean not null default false,
-    color VARCHAR(7) NOT NULL DEFAULT '#29C18C'
+    color VARCHAR(7) NOT NULL DEFAULT '#29C18C',
+    handout longtext NOT NULL DEFAULT ''
 );
 
 create table if not exists journey_detour(
