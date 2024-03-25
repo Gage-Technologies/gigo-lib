@@ -7,7 +7,7 @@ UPDATE bytes
 SET
     files_easy = JSON_ARRAY(
                 JSON_OBJECT(
-                    'code', outline_content_easy,
+                    'content', outline_content_easy,
                     'file_name',
                         CASE
                             WHEN lang = 5 THEN 'main.py'
@@ -18,7 +18,7 @@ SET
             ),
     files_medium = JSON_ARRAY(
             JSON_OBJECT(
-                    'code', outline_content_medium,
+                    'content', outline_content_medium,
                     'file_name',
                     CASE
                         WHEN lang = 5 THEN 'main.py'
@@ -29,7 +29,7 @@ SET
                  ),
     files_hard = JSON_ARRAY(
             JSON_OBJECT(
-                    'code', outline_content_hard,
+                    'content', outline_content_hard,
                     'file_name',
                     CASE
                         WHEN lang = 5 THEN 'main.py'
@@ -43,12 +43,12 @@ SET
 ALTER TABLE byte_attempts ADD COLUMN files_easy JSON;
 ALTER TABLE byte_attempts ADD COLUMN files_medium JSON;
 ALTER TABLE byte_attempts ADD COLUMN files_hard JSON;
-UPDATE byte_attempts
+UPDATE byte_attempts ba
 SET
     files_easy = (
         SELECT JSON_ARRAY(
                        JSON_OBJECT(
-                               'code', ba.content_easy,
+                               'content', ba.content_easy,
                                'file_name', CASE
                                                 WHEN b.lang = 5 THEN 'main.py'
                                                 WHEN b.lang = 6 THEN 'main.go'
@@ -57,12 +57,12 @@ SET
                        )
                )
         FROM bytes b
-        WHERE b._id = byte_attempts.byte_id
+        WHERE b._id = ba.byte_id
     ),
     files_medium = (
         SELECT JSON_ARRAY(
                        JSON_OBJECT(
-                               'code', ba.content_medium,
+                               'content', ba.content_medium,
                                'file_name', CASE
                                                 WHEN b.lang = 5 THEN 'main.py'
                                                 WHEN b.lang = 6 THEN 'main.go'
@@ -71,12 +71,12 @@ SET
                        )
                )
         FROM bytes b
-        WHERE b._id = byte_attempts.byte_id
+        WHERE b._id = ba.byte_id
     ),
     files_hard = (
         SELECT JSON_ARRAY(
                        JSON_OBJECT(
-                               'code', ba.content_hard,
+                               'content', ba.content_hard,
                                'file_name', CASE
                                                 WHEN b.lang = 5 THEN 'main.py'
                                                 WHEN b.lang = 6 THEN 'main.go'
@@ -85,11 +85,11 @@ SET
                        )
                )
         FROM bytes b
-        WHERE b._id = byte_attempts.byte_id
+        WHERE b._id = ba.byte_id
     )
 WHERE EXISTS (
     SELECT 1
     FROM bytes b
-    WHERE b._id = byte_attempts.byte_id
+    WHERE b._id = ba.byte_id
 );
 
