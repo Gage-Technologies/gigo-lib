@@ -27,6 +27,7 @@ type Bytes struct {
 	Lang              ProgrammingLanguage `json:"lang" sql:"lang"`
 	Published         bool                `json:"published" sql:"published"`
 	Color             string              `json:"color" sql:"color"`
+	CustomWsConfig    *WorkspaceConfig    `json:"custom_ws_config" sql:"custom_ws_config"`
 }
 
 type BytesSQL struct {
@@ -47,6 +48,7 @@ type BytesSQL struct {
 	Lang              ProgrammingLanguage `json:"lang" sql:"lang"`
 	Published         bool                `json:"published" sql:"published"`
 	Color             string              `json:"color" sql:"color"`
+	CustomWsConfig    []byte              `json:"custom_ws_config" sql:"custom_ws_config"`
 }
 
 type BytesFrontend struct {
@@ -161,6 +163,17 @@ func BytesFromSQLNative(rows *sql.Rows) (*Bytes, error) {
 		}
 	}
 
+	// create variable to decode workspace settings into
+	var workspaceConfig *WorkspaceConfig
+
+	if bytesSQL.CustomWsConfig != nil {
+		// unmarshall workspace setting from json buffer to WorkspaceSettings type
+		err = json.Unmarshal(bytesSQL.CustomWsConfig, &workspaceConfig)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshall workspace settings: %v", err)
+		}
+	}
+
 	return &Bytes{
 		ID:                bytesSQL.ID,
 		Name:              bytesSQL.Name,
@@ -179,6 +192,7 @@ func BytesFromSQLNative(rows *sql.Rows) (*Bytes, error) {
 		QuestionsHard:     questionsHard,
 		Published:         bytesSQL.Published,
 		Color:             bytesSQL.Color,
+		CustomWsConfig:    workspaceConfig,
 	}, nil
 }
 
@@ -268,9 +282,17 @@ func (b *Bytes) ToSQLNative() ([]*SQLInsertStatement, error) {
 		return nil, fmt.Errorf("error marshaling Files Hard JSON: %v", err)
 	}
 
+	var customWSConfig []byte
+	if b.CustomWsConfig != nil {
+		customWSConfig, err = json.Marshal(*b.CustomWsConfig)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling Custom WS Config: %v", err)
+		}
+	}
+
 	sqlStatements = append(sqlStatements, &SQLInsertStatement{
-		Statement: "insert ignore into bytes(_id, name, description_easy, description_medium, description_hard, files_easy, files_medium, files_hard, dev_steps_easy, dev_steps_medium, dev_steps_hard, lang, published, color, questions_easy, questions_medium, questions_hard) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);",
-		Values:    []interface{}{b.ID, b.Name, b.DescriptionEasy, b.DescriptionMedium, b.DescriptionHard, filesEasy, filesMedium, filesHard, b.DevStepsEasy, b.DevStepsMedium, b.DevStepsHard, b.Lang, b.Published, b.Color, questionsEasyJSON, questionsMediumJSON, questionsHardJSON},
+		Statement: "insert ignore into bytes(_id, name, description_easy, description_medium, description_hard, files_easy, files_medium, files_hard, dev_steps_easy, dev_steps_medium, dev_steps_hard, lang, published, color, questions_easy, questions_medium, questions_hard, custom_ws_config) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);",
+		Values:    []interface{}{b.ID, b.Name, b.DescriptionEasy, b.DescriptionMedium, b.DescriptionHard, filesEasy, filesMedium, filesHard, b.DevStepsEasy, b.DevStepsMedium, b.DevStepsHard, b.Lang, b.Published, b.Color, questionsEasyJSON, questionsMediumJSON, questionsHardJSON, customWSConfig},
 	})
 
 	return sqlStatements, nil

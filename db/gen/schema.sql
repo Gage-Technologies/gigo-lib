@@ -725,7 +725,8 @@ create table
         dev_steps_hard longtext,
         lang int not null default 5,
         published boolean not null default false,
-        color VARCHAR(7) NOT NULL DEFAULT '#29C18C'
+        color VARCHAR(7) NOT NULL DEFAULT '#29C18C',
+        custom_ws_config json
     );
 create table
     if not exists byte_attempts(
@@ -764,7 +765,8 @@ create table if not exists journey_units(
     langs json not null,
     published boolean not null default false,
     color VARCHAR(7) NOT NULL DEFAULT '#29C18C',
-    handout longtext NOT NULL DEFAULT ''
+    handout longtext NOT NULL DEFAULT '',
+    custom_ws_config json
 );
 
 create table if not exists journey_detour(

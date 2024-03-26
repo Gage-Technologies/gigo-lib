@@ -13,29 +13,31 @@ import (
 )
 
 type JourneyUnit struct {
-	ID          int64                 `json:"_id" sql:"_id"`
-	Name        string                `json:"name" sql:"name"`
-	UnitAbove   *int64                `json:"unit_above" sql:"unit_above"`
-	UnitBelow   *int64                `json:"unit_below" sql:"unit_below"`
-	Description string                `json:"description" sql:"description"`
-	Langs       []ProgrammingLanguage `json:"langs" sql:"langs"`
-	Tags        []string              `json:"tags" sql:"tags"`
-	Published   bool                  `json:"published" sql:"published"`
-	Color       string                `json:"color" sql:"color"`
-	Handout     string                `json:"handout" sql:"handout"`
+	ID             int64                 `json:"_id" sql:"_id"`
+	Name           string                `json:"name" sql:"name"`
+	UnitAbove      *int64                `json:"unit_above" sql:"unit_above"`
+	UnitBelow      *int64                `json:"unit_below" sql:"unit_below"`
+	Description    string                `json:"description" sql:"description"`
+	Langs          []ProgrammingLanguage `json:"langs" sql:"langs"`
+	Tags           []string              `json:"tags" sql:"tags"`
+	Published      bool                  `json:"published" sql:"published"`
+	Color          string                `json:"color" sql:"color"`
+	Handout        string                `json:"handout" sql:"handout"`
+	CustomWSConfig *WorkspaceConfig      `json:"custom_ws_config" sql:"custom_ws_config"`
 }
 
 type JourneyUnitSQL struct {
-	ID          int64    `json:"_id" sql:"_id"`
-	Name        string   `json:"name" sql:"name"`
-	UnitAbove   *int64   `json:"unit_above" sql:"unit_above"`
-	UnitBelow   *int64   `json:"unit_below" sql:"unit_below"`
-	Description string   `json:"description" sql:"description"`
-	Langs       []byte   `json:"langs" sql:"langs"`
-	Tags        []string `json:"tags" sql:"tags"`
-	Published   bool     `json:"published" sql:"published"`
-	Color       string   `json:"color" sql:"color"`
-	Handout     string   `json:"handout" sql:"handout"`
+	ID             int64    `json:"_id" sql:"_id"`
+	Name           string   `json:"name" sql:"name"`
+	UnitAbove      *int64   `json:"unit_above" sql:"unit_above"`
+	UnitBelow      *int64   `json:"unit_below" sql:"unit_below"`
+	Description    string   `json:"description" sql:"description"`
+	Langs          []byte   `json:"langs" sql:"langs"`
+	Tags           []string `json:"tags" sql:"tags"`
+	Published      bool     `json:"published" sql:"published"`
+	Color          string   `json:"color" sql:"color"`
+	Handout        string   `json:"handout" sql:"handout"`
+	CustomWSConfig []byte   `json:"custom_ws_config" sql:"custom_ws_config"`
 }
 
 type JourneyUnitFrontend struct {
@@ -89,16 +91,28 @@ func JourneyUnitFromSQLNative(ctx context.Context, span *trace.Span, tidb *ti.Da
 		}
 	}
 
+	// create variable to decode workspace settings into
+	var workspaceConfig *WorkspaceConfig
+
+	if JourneyUnitSQL.CustomWSConfig != nil {
+		// unmarshall workspace setting from json buffer to WorkspaceSettings type
+		err = json.Unmarshal(JourneyUnitSQL.CustomWSConfig, &workspaceConfig)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshall workspace settings: %v", err)
+		}
+	}
+
 	jUnit := JourneyUnit{
-		ID:          JourneyUnitSQL.ID,
-		Name:        JourneyUnitSQL.Name,
-		UnitAbove:   JourneyUnitSQL.UnitAbove,
-		UnitBelow:   JourneyUnitSQL.UnitBelow,
-		Description: JourneyUnitSQL.Description,
-		Langs:       langs,
-		Published:   JourneyUnitSQL.Published,
-		Color:       JourneyUnitSQL.Color,
-		Handout:     JourneyUnitSQL.Handout,
+		ID:             JourneyUnitSQL.ID,
+		Name:           JourneyUnitSQL.Name,
+		UnitAbove:      JourneyUnitSQL.UnitAbove,
+		UnitBelow:      JourneyUnitSQL.UnitBelow,
+		Description:    JourneyUnitSQL.Description,
+		Langs:          langs,
+		Published:      JourneyUnitSQL.Published,
+		Color:          JourneyUnitSQL.Color,
+		Handout:        JourneyUnitSQL.Handout,
+		CustomWSConfig: workspaceConfig,
 	}
 
 	callerName := "JourneyUnitFromSQLNative"
@@ -179,9 +193,18 @@ func (b *JourneyUnit) ToSQLNative() ([]*SQLInsertStatement, error) {
 		})
 	}
 
+	var customWSConfig []byte
+	var err error
+	if b.CustomWSConfig != nil {
+		customWSConfig, err = json.Marshal(*b.CustomWSConfig)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling Custom WS Config: %v", err)
+		}
+	}
+
 	sqlStatements = append(sqlStatements, &SQLInsertStatement{
-		Statement: "insert ignore into journey_units(_id, name, description, unit_above, unit_below, langs, published, color, handout) values(?,?,?,?,?,?,?,?,?);",
-		Values:    []interface{}{b.ID, b.Name, b.Description, b.UnitAbove, b.UnitBelow, bytes, b.Published, b.Color, b.Handout},
+		Statement: "insert ignore into journey_units(_id, name, description, unit_above, unit_below, langs, published, color, handout, custom_ws_config) values(?,?,?,?,?,?,?,?,?,?);",
+		Values:    []interface{}{b.ID, b.Name, b.Description, b.UnitAbove, b.UnitBelow, bytes, b.Published, b.Color, b.Handout, customWSConfig},
 	})
 
 	return sqlStatements, nil
