@@ -5,29 +5,30 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gage-technologies/gigo-lib/types"
+	"github.com/gage-technologies/gigo-lib/workspace_config"
 
 	"github.com/kisielk/sqlstruct"
 )
 
 type Bytes struct {
-	ID                int64               `json:"_id" sql:"_id"`
-	Name              string              `json:"name" sql:"name"`
-	DescriptionEasy   string              `json:"description_easy" sql:"description_easy"`
-	DescriptionMedium string              `json:"description_medium" sql:"description_medium"`
-	DescriptionHard   string              `json:"description_hard" sql:"description_hard"`
-	FilesEasy         []types.CodeFile    `json:"files_easy" sql:"files_easy"`
-	FilesMedium       []types.CodeFile    `json:"files_medium" sql:"files_medium"`
-	FilesHard         []types.CodeFile    `json:"files_hard" sql:"files_hard"`
-	DevStepsEasy      string              `json:"dev_steps_easy" sql:"dev_steps_easy"`
-	DevStepsMedium    string              `json:"dev_steps_medium" sql:"dev_steps_medium"`
-	DevStepsHard      string              `json:"dev_steps_hard" sql:"dev_steps_hard"`
-	QuestionsEasy     []string            `json:"questions_easy" sql:"questions_easy"`
-	QuestionsMedium   []string            `json:"questions_medium" sql:"questions_medium"`
-	QuestionsHard     []string            `json:"questions_hard" sql:"questions_hard"`
-	Lang              ProgrammingLanguage `json:"lang" sql:"lang"`
-	Published         bool                `json:"published" sql:"published"`
-	Color             string              `json:"color" sql:"color"`
-	CustomWsConfig    *WorkspaceConfig    `json:"custom_ws_config" sql:"custom_ws_config"`
+	ID                int64                                 `json:"_id" sql:"_id"`
+	Name              string                                `json:"name" sql:"name"`
+	DescriptionEasy   string                                `json:"description_easy" sql:"description_easy"`
+	DescriptionMedium string                                `json:"description_medium" sql:"description_medium"`
+	DescriptionHard   string                                `json:"description_hard" sql:"description_hard"`
+	FilesEasy         []types.CodeFile                      `json:"files_easy" sql:"files_easy"`
+	FilesMedium       []types.CodeFile                      `json:"files_medium" sql:"files_medium"`
+	FilesHard         []types.CodeFile                      `json:"files_hard" sql:"files_hard"`
+	DevStepsEasy      string                                `json:"dev_steps_easy" sql:"dev_steps_easy"`
+	DevStepsMedium    string                                `json:"dev_steps_medium" sql:"dev_steps_medium"`
+	DevStepsHard      string                                `json:"dev_steps_hard" sql:"dev_steps_hard"`
+	QuestionsEasy     []string                              `json:"questions_easy" sql:"questions_easy"`
+	QuestionsMedium   []string                              `json:"questions_medium" sql:"questions_medium"`
+	QuestionsHard     []string                              `json:"questions_hard" sql:"questions_hard"`
+	Lang              ProgrammingLanguage                   `json:"lang" sql:"lang"`
+	Published         bool                                  `json:"published" sql:"published"`
+	Color             string                                `json:"color" sql:"color"`
+	CustomWsConfig    *workspace_config.GigoWorkspaceConfig `json:"custom_ws_config" sql:"custom_ws_config"`
 }
 
 type BytesSQL struct {
@@ -164,7 +165,7 @@ func BytesFromSQLNative(rows *sql.Rows) (*Bytes, error) {
 	}
 
 	// create variable to decode workspace settings into
-	var workspaceConfig *WorkspaceConfig
+	var workspaceConfig *workspace_config.GigoWorkspaceConfig
 
 	if bytesSQL.CustomWsConfig != nil {
 		// unmarshall workspace setting from json buffer to WorkspaceSettings type

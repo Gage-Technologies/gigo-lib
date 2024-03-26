@@ -7,23 +7,24 @@ import (
 	"errors"
 	"fmt"
 	ti "github.com/gage-technologies/gigo-lib/db"
+	"github.com/gage-technologies/gigo-lib/workspace_config"
 	"go.opentelemetry.io/otel/trace"
 
 	"github.com/kisielk/sqlstruct"
 )
 
 type JourneyUnit struct {
-	ID             int64                 `json:"_id" sql:"_id"`
-	Name           string                `json:"name" sql:"name"`
-	UnitAbove      *int64                `json:"unit_above" sql:"unit_above"`
-	UnitBelow      *int64                `json:"unit_below" sql:"unit_below"`
-	Description    string                `json:"description" sql:"description"`
-	Langs          []ProgrammingLanguage `json:"langs" sql:"langs"`
-	Tags           []string              `json:"tags" sql:"tags"`
-	Published      bool                  `json:"published" sql:"published"`
-	Color          string                `json:"color" sql:"color"`
-	Handout        string                `json:"handout" sql:"handout"`
-	CustomWSConfig *WorkspaceConfig      `json:"custom_ws_config" sql:"custom_ws_config"`
+	ID             int64                                 `json:"_id" sql:"_id"`
+	Name           string                                `json:"name" sql:"name"`
+	UnitAbove      *int64                                `json:"unit_above" sql:"unit_above"`
+	UnitBelow      *int64                                `json:"unit_below" sql:"unit_below"`
+	Description    string                                `json:"description" sql:"description"`
+	Langs          []ProgrammingLanguage                 `json:"langs" sql:"langs"`
+	Tags           []string                              `json:"tags" sql:"tags"`
+	Published      bool                                  `json:"published" sql:"published"`
+	Color          string                                `json:"color" sql:"color"`
+	Handout        string                                `json:"handout" sql:"handout"`
+	CustomWSConfig *workspace_config.GigoWorkspaceConfig `json:"custom_ws_config" sql:"custom_ws_config"`
 }
 
 type JourneyUnitSQL struct {
@@ -92,7 +93,7 @@ func JourneyUnitFromSQLNative(ctx context.Context, span *trace.Span, tidb *ti.Da
 	}
 
 	// create variable to decode workspace settings into
-	var workspaceConfig *WorkspaceConfig
+	var workspaceConfig *workspace_config.GigoWorkspaceConfig
 
 	if JourneyUnitSQL.CustomWSConfig != nil {
 		// unmarshall workspace setting from json buffer to WorkspaceSettings type
