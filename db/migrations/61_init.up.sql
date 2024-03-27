@@ -1,7 +1,7 @@
 -- MySQL v5.7
 
--- add create_start_timestamp to workspace_pool
-ALTER TABLE workspace_pool ADD COLUMN create_start_timestamp TIMESTAMP;
+-- add last_state_update to workspace_pool
+ALTER TABLE workspace_pool ADD COLUMN last_state_update TIMESTAMP;
 
 -- add expiration to workspace_pool
 ALTER TABLE workspace_pool ADD COLUMN expiration TIMESTAMP;
