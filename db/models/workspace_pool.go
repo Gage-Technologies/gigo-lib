@@ -14,6 +14,7 @@ const (
 	WorkspacePoolStateAvailable WorkspacePoolState = iota
 	WorkspacePoolStateInUse
 	WorkspacePoolStateProvisioning
+	WorkspacePoolStateDestroying
 )
 
 // WorkspacePool
