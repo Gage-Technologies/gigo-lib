@@ -13,6 +13,7 @@ type WorkspacePoolState int
 const (
 	WorkspacePoolStateAvailable WorkspacePoolState = iota
 	WorkspacePoolStateInUse
+	WorkspacePoolStateProvisioning
 )
 
 // WorkspacePool
