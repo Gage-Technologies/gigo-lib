@@ -53,10 +53,14 @@ type WorkspacePool struct {
 
 	// CreationStartTimestamp Timestamp when the workspace pool was created
 	CreationStartTimestamp *time.Time `json:"creation_start_timestamp" sql:"creation_start_timestamp"`
+
+	// Expiration Timestamp when the workspace pool expires
+	ExpirationTimestamp *time.Time `json:"expiration_timestamp" sql:"expiration_timestamp"`
 }
 
 func CreateWorkspacePool(_id int64, container string, state WorkspacePoolState, memory int64, cpu int64, volumeSize int, secret string, storageClass string, workspaceTableId *int64) *WorkspacePool {
 	n := time.Now()
+	e := n.Add(time.Hour * 8)
 	return &WorkspacePool{
 		ID:                     _id,
 		Container:              container,
@@ -68,6 +72,7 @@ func CreateWorkspacePool(_id int64, container string, state WorkspacePoolState, 
 		StorageClass:           storageClass,
 		WorkspaceTableID:       workspaceTableId,
 		CreationStartTimestamp: &n,
+		ExpirationTimestamp:    &e,
 	}
 }
 
@@ -83,8 +88,8 @@ func WorkspacePoolFromSqlNative(rows *sql.Rows) (*WorkspacePool, error) {
 func (w *WorkspacePool) ToSqlNative() ([]SQLInsertStatement, error) {
 	return []SQLInsertStatement{
 		{
-			Statement: `insert into workspace_pool (_id, container, state, memory, cpu, volume_size, secret, agent_id, workspace_table_id, creation_start_timestamp) values (?, ?, ?, ?, ?, ?, uuid_to_bin(?), ?, ?, ?)`,
-			Values:    []interface{}{w.ID, w.Container, w.State, w.Memory, w.CPU, w.VolumeSize, w.Secret, w.AgentID, w.WorkspaceTableID, w.CreationStartTimestamp},
+			Statement: `insert into workspace_pool (_id, container, state, memory, cpu, volume_size, secret, agent_id, workspace_table_id, creation_start_timestamp, expiration) values (?, ?, ?, ?, ?, ?, uuid_to_bin(?), ?, ?, ?, ?)`,
+			Values:    []interface{}{w.ID, w.Container, w.State, w.Memory, w.CPU, w.VolumeSize, w.Secret, w.AgentID, w.WorkspaceTableID, w.CreationStartTimestamp, w.ExpirationTimestamp},
 		},
 	}, nil
 }
