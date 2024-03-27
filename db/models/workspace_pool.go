@@ -3,6 +3,7 @@ package models
 import (
 	"database/sql"
 	"fmt"
+	"github.com/google/uuid"
 	"time"
 
 	"github.com/kisielk/sqlstruct"
@@ -86,10 +87,15 @@ func WorkspacePoolFromSqlNative(rows *sql.Rows) (*WorkspacePool, error) {
 }
 
 func (w *WorkspacePool) ToSqlNative() ([]SQLInsertStatement, error) {
+	// create fake uuid to placehold if the secret is empty
+	secret := w.Secret
+	if len(secret) == 0 {
+		secret = uuid.New().String()
+	}
 	return []SQLInsertStatement{
 		{
 			Statement: `insert into workspace_pool (_id, container, state, memory, cpu, volume_size, secret, agent_id, workspace_table_id, create_start_timestamp, expiration) values (?, ?, ?, ?, ?, ?, uuid_to_bin(?), ?, ?, ?, ?)`,
-			Values:    []interface{}{w.ID, w.Container, w.State, w.Memory, w.CPU, w.VolumeSize, w.Secret, w.AgentID, w.WorkspaceTableID, w.CreationStart, w.Expiration},
+			Values:    []interface{}{w.ID, w.Container, w.State, w.Memory, w.CPU, w.VolumeSize, secret, w.AgentID, w.WorkspaceTableID, w.CreationStart, w.Expiration},
 		},
 	}, nil
 }
