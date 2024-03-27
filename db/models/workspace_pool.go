@@ -3,6 +3,7 @@ package models
 import (
 	"database/sql"
 	"fmt"
+	"time"
 
 	"github.com/kisielk/sqlstruct"
 )
@@ -14,7 +15,7 @@ const (
 	WorkspacePoolStateInUse
 )
 
-// Volume
+// WorkspacePool
 //
 //	Represents a workspace that has been pre-provisioned by the workspace pool
 type WorkspacePool struct {
@@ -47,19 +48,24 @@ type WorkspacePool struct {
 
 	// StorageClass Name of the storage class that owns the volume
 	StorageClass string `json:"storage_class" sql:"storage_class"`
+
+	// CreationStartTimestamp Timestamp when the workspace pool was created
+	CreationStartTimestamp *time.Time `json:"creation_start_timestamp" sql:"creation_start_timestamp"`
 }
 
 func CreateWorkspacePool(_id int64, container string, state WorkspacePoolState, memory int64, cpu int64, volumeSize int, secret string, storageClass string, workspaceTableId *int64) *WorkspacePool {
+	n := time.Now()
 	return &WorkspacePool{
-		ID:               _id,
-		Container:        container,
-		State:            state,
-		Memory:           memory,
-		CPU:              cpu,
-		VolumeSize:       volumeSize,
-		Secret:           secret,
-		StorageClass:     storageClass,
-		WorkspaceTableID: workspaceTableId,
+		ID:                     _id,
+		Container:              container,
+		State:                  state,
+		Memory:                 memory,
+		CPU:                    cpu,
+		VolumeSize:             volumeSize,
+		Secret:                 secret,
+		StorageClass:           storageClass,
+		WorkspaceTableID:       workspaceTableId,
+		CreationStartTimestamp: &n,
 	}
 }
 
@@ -75,8 +81,8 @@ func WorkspacePoolFromSqlNative(rows *sql.Rows) (*WorkspacePool, error) {
 func (w *WorkspacePool) ToSqlNative() ([]SQLInsertStatement, error) {
 	return []SQLInsertStatement{
 		{
-			Statement: `insert into workspace_pool (_id, container, state, memory, cpu, volume_size, secret, agent_id, workspace_table_id) values (?, ?, ?, ?, ?, ?, uuid_to_bin(?), ?, ?)`,
-			Values:    []interface{}{w.ID, w.Container, w.State, w.Memory, w.CPU, w.VolumeSize, w.Secret, w.AgentID, w.WorkspaceTableID},
+			Statement: `insert into workspace_pool (_id, container, state, memory, cpu, volume_size, secret, agent_id, workspace_table_id, creation_start_timestamp) values (?, ?, ?, ?, ?, ?, uuid_to_bin(?), ?, ?, ?)`,
+			Values:    []interface{}{w.ID, w.Container, w.State, w.Memory, w.CPU, w.VolumeSize, w.Secret, w.AgentID, w.WorkspaceTableID, w.CreationStartTimestamp},
 		},
 	}, nil
 }
